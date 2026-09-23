@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent 管理 — Haven 运维 Agent</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar"></aside>
+    <div class="main-area">
+      <header class="topbar">
+        <div class="topbar-title">Agent 管理</div>
+        <div class="topbar-actions">
+          <button class="btn btn-outline btn-sm" onclick="toast('已重启所有 Agent（原型演示）','success')">↻ 重启所有</button>
+          <button class="btn btn-outline btn-sm" onclick="toast('日志已导出（原型演示）','success')">⬇ 导出日志</button>
+        </div>
+      </header>
+
+      <div class="page">
+        <div class="page-header">
+          <h1>Multi-Agent 系统</h1>
+          <p class="subtitle">编排层 + 4 个子智能体：任务协调、日志分析、告警监测、诊断巡检</p>
+        </div>
+
+        <!-- Agent 卡片网格 -->
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:16px; margin-bottom:24px;">
+          <!-- 编排 Coordinator -->
+          <div class="card stat-card">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:44px; height:44px; border-radius:10px; background:hsl(var(--agent-coord)); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                  <span style="font-size:20px;">🎯</span>
+                </div>
+                <div><h3 style="margin:0; font-size:15px;">Coordinator</h3><p style="font-size:12px; color:hsl(var(--muted-foreground));">编排 · 任务协调</p></div>
+              </div>
+              <span class="badge badge-ok"><span class="pulse-dot"></span>运行中</span>
+            </div>
+            <div style="font-size:13px; line-height:2;">
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">活跃任务</span><span id="c-active">0</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">完成任务</span><span>127</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">平均延迟</span><span>25ms</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">成功率</span><span style="color:hsl(var(--severity-ok));">99.8%</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">正常运行时长</span><span>12h 34m</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">版本</span><span style="font-family:monospace; font-size:12px;">v1.2.0</span></div>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:14px; padding-top:14px; border-top:1px solid hsl(var(--border));">
+              <button class="btn btn-secondary btn-sm" style="flex:1;" data-agent="coordinator">查看详情</button>
+              <button class="btn btn-ghost btn-sm" data-agent="coordinator">停止</button>
+              <button class="btn btn-ghost btn-sm" data-agent="coordinator">重启</button>
+            </div>
+          </div>
+
+          <!-- LogAnalyst -->
+          <div class="card stat-card">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:44px; height:44px; border-radius:10px; background:hsl(var(--agent-log)); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                  <span style="font-size:20px;">📋</span>
+                </div>
+                <div><h3 style="margin:0; font-size:15px;">LogAnalyst</h3><p style="font-size:12px; color:hsl(var(--muted-foreground));">日志分析</p></div>
+              </div>
+              <span class="badge badge-ok"><span class="pulse-dot"></span>运行中</span>
+            </div>
+            <div style="font-size:13px; line-height:2;">
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">活跃任务</span><span style="color:hsl(var(--primary));">3</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">完成任务</span><span>452</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">平均延迟</span><span>180ms</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">成功率</span><span style="color:hsl(var(--severity-ok));">98.5%</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">正常运行时长</span><span>12h 34m</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">版本</span><span style="font-family:monospace; font-size:12px;">v1.2.0</span></div>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:14px; padding-top:14px; border-top:1px solid hsl(var(--border));">
+              <button class="btn btn-secondary btn-sm" style="flex:1;" data-agent="loganalyst">查看详情</button>
+              <button class="btn btn-ghost btn-sm" data-agent="loganalyst">停止</button>
+              <button class="btn btn-ghost btn-sm" data-agent="loganalyst">重启</button>
+            </div>
+          </div>
+
+          <!-- Monitor -->
+          <div class="card stat-card">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:44px; height:44px; border-radius:10px; background:hsl(var(--agent-monitor)); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                  <span style="font-size:20px;">📊</span>
+                </div>
+                <div><h3 style="margin:0; font-size:15px;">Monitor</h3><p style="font-size:12px; color:hsl(var(--muted-foreground));">告警监测 · 指标</p></div>
+              </div>
+              <span class="badge badge-low">⚠️ 告警中</span>
+            </div>
+            <div style="font-size:13px; line-height:2;">
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">活跃任务</span><span style="color:hsl(var(--primary));">1</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">完成任务</span><span>89</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">平均延迟</span><span>850ms</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">成功率</span><span style="color:hsl(var(--severity-ok));">97.2%</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">正常运行时长</span><span>12h 34m</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">版本</span><span style="font-family:monospace; font-size:12px;">v1.2.0</span></div>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:14px; padding-top:14px; border-top:1px solid hsl(var(--border));">
+              <button class="btn btn-secondary btn-sm" style="flex:1;" data-agent="monitor">查看详情</button>
+              <button class="btn btn-ghost btn-sm" data-agent="monitor">停止</button>
+              <button class="btn btn-ghost btn-sm" data-agent="monitor">重启</button>
+            </div>
+          </div>
+
+          <!-- Inspector -->
+          <div class="card stat-card">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+              <div style="display:flex; align-items:center; gap:12px;">
+                <div style="width:44px; height:44px; border-radius:10px; background:hsl(var(--agent-inspector)); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
+                  <span style="font-size:20px;">🔍</span>
+                </div>
+                <div><h3 style="margin:0; font-size:15px;">Inspector</h3><p style="font-size:12px; color:hsl(var(--muted-foreground));">诊断 · 巡检</p></div>
+              </div>
+              <span class="badge badge-ok"><span class="pulse-dot"></span>运行中</span>
+            </div>
+            <div style="font-size:13px; line-height:2;">
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">活跃任务</span><span>0</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">完成任务</span><span>34</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">平均延迟</span><span>2.1s</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">成功率</span><span style="color:hsl(var(--severity-ok));">100%</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">正常运行时长</span><span>12h 34m</span></div>
+              <div style="display:flex; justify-content:space-between;"><span style="color:hsl(var(--muted-foreground));">版本</span><span style="font-family:monospace; font-size:12px;">v1.2.0</span></div>
+            </div>
+            <div style="display:flex; gap:8px; margin-top:14px; padding-top:14px; border-top:1px solid hsl(var(--border));">
+              <button class="btn btn-secondary btn-sm" style="flex:1;" data-agent="inspector">查看详情</button>
+              <button class="btn btn-ghost btn-sm" data-agent="inspector">停止</button>
+              <button class="btn btn-ghost btn-sm" data-agent="inspector">重启</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 下方图表区 -->
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px;">
+          <!-- Agent 负载历史 -->
+          <div class="card" style="grid-column: span 2;">
+            <div class="card-header" style="display:flex; align-items:center; justify-content:space-between;">
+              <h3>Agent 负载历史（24 小时）</h3>
+              <select class="input" style="width:auto; height:30px; padding:0 8px; font-size:12px;">
+                <option>过去 24 小时</option>
+                <option>过去 7 天</option>
+                <option>过去 30 天</option>
+              </select>
+            </div>
+            <svg viewBox="0 0 800 180" style="width:100%; height:180px;">
+              <line x1="40" y1="30" x2="780" y2="30" stroke="hsl(var(--border))" stroke-width="1"/>
+              <line x1="40" y1="70" x2="780" y2="70" stroke="hsl(var(--border))" stroke-width="1"/>
+              <line x1="40" y1="110" x2="780" y2="110" stroke="hsl(var(--border))" stroke-width="1"/>
+              <line x1="40" y1="150" x2="780" y2="150" stroke="hsl(var(--border))" stroke-width="1"/>
+              <!-- 面积堆叠 -->
+              <path d="M40,150 L160,130 L280,120 L400,140 L520,105 L640,115 L720,120 L780,110 L780,150 Z" fill="hsl(var(--agent-inspector) / 0.25)"/>
+              <path d="M40,150 L160,115 L280,95 L400,80 L520,65 L640,80 L720,70 L780,62 L780,150 Z" fill="hsl(var(--agent-log) / 0.4)"/>
+              <path d="M40,150 L160,95 L280,60 L400,30 L520,40 L640,55 L720,45 L780,38 L780,150 Z" fill="hsl(var(--agent-monitor) / 0.55)"/>
+              <text x="40" y="172" fill="hsl(var(--muted-foreground))" font-size="10" text-anchor="middle">00:00</text>
+              <text x="280" y="172" fill="hsl(var(--muted-foreground))" font-size="10" text-anchor="middle">06:00</text>
+              <text x="400" y="172" fill="hsl(var(--muted-foreground))" font-size="10" text-anchor="middle">12:00</text>
+              <text x="640" y="172" fill="hsl(var(--muted-foreground))" font-size="10" text-anchor="middle">18:00</text>
+              <text x="780" y="172" fill="hsl(var(--muted-foreground))" font-size="10" text-anchor="middle">24:00</text>
+            </svg>
+            <div style="display:flex; justify-content:center; gap:16px; margin-top:8px; font-size:12px;">
+              <span style="display:flex; align-items:center; gap:5px;"><span style="width:10px; height:10px; border-radius:2px; background:hsl(var(--agent-coord));"></span><span style="color:hsl(var(--muted-foreground));">编排</span></span>
+              <span style="display:flex; align-items:center; gap:5px;"><span style="width:10px; height:10px; border-radius:2px; background:hsl(var(--agent-log));"></span><span style="color:hsl(var(--muted-foreground));">日志</span></span>
+              <span style="display:flex; align-items:center; gap:5px;"><span style="width:10px; height:10px; border-radius:2px; background:hsl(var(--agent-monitor));"></span><span style="color:hsl(var(--muted-foreground));">告警</span></span>
+              <span style="display:flex; align-items:center; gap:5px;"><span style="width:10px; height:10px; border-radius:2px; background:hsl(var(--agent-inspector));"></span><span style="color:hsl(var(--muted-foreground));">诊断</span></span>
+            </div>
+          </div>
+
+          <!-- 任务队列 -->
+          <div class="card">
+            <div class="card-header"><h3>任务队列</h3></div>
+            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; margin-bottom:16px;">
+              <div style="text-align:center;"><div style="font-size:26px; font-weight:700; color:hsl(var(--severity-high));">2</div><div style="font-size:12px; color:hsl(var(--muted-foreground));">待处理</div></div>
+              <div style="text-align:center;"><div style="font-size:26px; font-weight:700; color:hsl(var(--primary));">1</div><div style="font-size:12px; color:hsl(var(--muted-foreground));">处理中</div></div>
+              <div style="text-align:center;"><div style="font-size:26px; font-weight:700; color:hsl(var(--severity-ok));">702</div><div style="font-size:12px; color:hsl(var(--muted-foreground));">已完成</div></div>
+              <div style="text-align:center;"><div style="font-size:26px; font-weight:700; color:hsl(var(--severity-low));">3</div><div style="font-size:12px; color:hsl(var(--muted-foreground));">失败</div></div>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <div style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:8px; background:hsl(var(--muted) / 0.4);">
+                <span style="width:8px; height:8px; border-radius:50%; background:hsl(var(--severity-high)); flex-shrink:0;"></span>
+                <div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:500;">incident-20240615-001 RCA 分析</div><div style="font-size:12px; color:hsl(var(--muted-foreground));">Monitor Agent · 进行中</div></div>
+                <span style="font-size:12px; color:hsl(var(--muted-foreground));">65%</span>
+              </div>
+              <div style="display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:8px; background:hsl(var(--muted) / 0.4);">
+                <span style="width:8px; height:8px; border-radius:50%; background:hsl(var(--severity-low)); flex-shrink:0;"></span>
+                <div style="flex:1; min-width:0;"><div style="font-size:13px; font-weight:500;">日志查询失败重试</div><div style="font-size:12px; color:hsl(var(--muted-foreground));">LogAnalyst Agent · 等待中</div></div>
+                <span style="font-size:12px; color:hsl(var(--muted-foreground));">-</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Agent 性能指标 -->
+          <div class="card">
+            <div class="card-header"><h3>Agent 性能指标</h3></div>
+            <div style="display:grid; grid-template-columns: repeat(2, 1fr); gap:12px;">
+              <div style="padding:12px; border-radius:8px; background:hsl(var(--muted) / 0.4);">
+                <div style="font-size:12px; color:hsl(var(--muted-foreground)); margin-bottom:4px;">今日总任务数</div>
+                <div style="font-size:22px; font-weight:700;">652</div>
+                <div style="font-size:12px; color:hsl(var(--severity-ok)); margin-top:2px;">▲ 8% vs 昨天</div>
+              </div>
+              <div style="padding:12px; border-radius:8px; background:hsl(var(--muted) / 0.4);">
+                <div style="font-size:12px; color:hsl(var(--muted-foreground)); margin-bottom:4px;">平均响应时间</div>
+                <div style="font-size:22px; font-weight:700;">285ms</div>
+                <div style="font-size:12px; color:hsl(var(--severity-ok)); margin-top:2px;">▼ 12% vs 昨天</div>
+              </div>
+              <div style="padding:12px; border-radius:8px; background:hsl(var(--muted) / 0.4);">
+                <div style="font-size:12px; color:hsl(var(--muted-foreground)); margin-bottom:4px;">错误率</div>
+                <div style="font-size:22px; font-weight:700;">1.8%</div>
+                <div style="font-size:12px; color:hsl(var(--severity-high)); margin-top:2px;">▲ 0.3% vs 昨天</div>
+              </div>
+              <div style="padding:12px; border-radius:8px; background:hsl(var(--muted) / 0.4);">
+                <div style="font-size:12px; color:hsl(var(--muted-foreground)); margin-bottom:4px;">资源使用率</div>
+                <div style="font-size:22px; font-weight:700;">42%</div>
+                <div style="font-size:12px; color:hsl(var(--muted-foreground)); margin-top:2px;">CPU / 内存</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Agent 详情 Dialog -->
+  <div class="dialog-overlay" id="agentDetail" role="dialog" aria-modal="true" aria-label="Agent 详情">
+    <div class="dialog">
+      <h3 id="adTitle">Coordinator</h3>
+      <p style="font-size:13px; color:hsl(var(--muted-foreground)); margin-bottom:12px;" id="adRole">编排 · 任务协调</p>
+      <pre class="code-block" id="adInfo">活跃任务 0 · 完成 127 · 延迟 25ms · 成功率 99.8%</pre>
+      <div class="dialog-actions"><button class="btn" data-action="close-dialog">关闭</button></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    injectSidebar('agents');
+    var agents = {
+      coordinator: { name: 'Coordinator', role: '编排 · 任务协调', info: '活跃任务 0 · 完成 127 · 延迟 25ms\n成功率 99.8% · Uptime 12h34m · v1.2.0' },
+      loganalyst: { name: 'LogAnalyst', role: '日志分析', info: '活跃任务 3 · 完成 452 · 延迟 180ms\n成功率 98.5% · Uptime 12h34m · v1.2.0' },
+      monitor: { name: 'Monitor', role: '告警监测 · 指标', info: '活跃任务 1 · 完成 89 · 延迟 850ms\n成功率 97.2% · Uptime 12h34m · v1.2.0' },
+      inspector: { name: 'Inspector', role: '诊断 · 巡检', info: '活跃任务 0 · 完成 34 · 延迟 2.1s\n成功率 100% · Uptime 12h34m · v1.2.0' },
+    };
+    document.querySelectorAll('[data-agent]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var a = agents[b.dataset.agent];
+        if (b.textContent.trim() === '停止') { toast(a.name + ' 已停止（原型演示）', 'success'); return; }
+        if (b.textContent.trim() === '重启') { toast(a.name + ' 已重启（原型演示）', 'success'); return; }
+        document.getElementById('adTitle').textContent = a.name;
+        document.getElementById('adRole').textContent = a.role;
+        document.getElementById('adInfo').textContent = a.info;
+        openDialog('agentDetail');
+      });
+    });
+  </script>
+</body>
+</html>

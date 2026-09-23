@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>诊断详情 — Haven 运维 Agent</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar"></aside>
+    <div class="main-area">
+      <header class="topbar">
+        <div class="topbar-title">诊断详情</div>
+        <div class="topbar-actions">
+          <button class="btn btn-outline btn-sm" onclick="history.back()">← 返回</button>
+        </div>
+      </header>
+
+      <div class="page">
+        <div class="breadcrumb"><a href="risk-center.html">风险中心</a><span class="sep">/</span><span>诊断详情</span></div>
+
+        <!-- 标题行（元数据） -->
+        <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px; flex-wrap:wrap;">
+          <div>
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+              <h1 style="font-size:22px; font-weight:700;">order-service</h1>
+              <span class="badge badge-high">高危</span>
+              <span class="badge badge-ghost" style="font-family:monospace;">85 分</span>
+              <span style="font-family:monospace; font-size:12px; color:hsl(var(--muted-foreground));">09:45</span>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <span class="badge badge-muted">降级：LLM 预算耗尽，纯规则结论</span>
+              <span class="badge badge-muted">结果已截断，共 1247 条匹配</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 根因结论（主视觉权重） -->
+        <div class="card card-rca" style="margin-bottom:16px; padding:24px;">
+          <p style="font-size:12px; color:hsl(var(--muted-foreground)); margin-bottom:6px;">🔎 根因结论</p>
+          <h2 style="font-size:20px; font-weight:700; margin-bottom:12px;">数据库连接池耗尽 <span style="font-size:13px; font-weight:500; color:hsl(var(--muted-foreground));">（置信度 85%）</span></h2>
+          <div class="collapsible-header"><span style="font-size:13px; color:hsl(var(--muted-foreground));">数据源引用（2）</span><span class="chevron">▾</span></div>
+          <div class="collapsible-content">
+            <div class="evidence-card"><div class="evidence-card-header"><span class="dot" style="background:hsl(var(--agent-log));"></span>SLS 日志</div>order-service-prod 10:10 起 "connection pool exhausted" 单分钟 230 条</div>
+            <div class="evidence-card"><div class="evidence-card-header"><span class="dot" style="background:hsl(var(--agent-monitor));"></span>指标</div>postgres-order 活跃连接 10:10 触顶 200/200</div>
+          </div>
+        </div>
+
+        <!-- 处置建议（次级） -->
+        <div class="card" style="margin-bottom:16px;">
+          <h3>处置建议</h3>
+          <ul style="margin-left:18px; font-size:13px; line-height:2;">
+            <li>扩容 order-service 连接池至 300 <span class="badge badge-ghost">仅展示 · P3 可执行</span></li>
+            <li>核对最近一次部署是否引入连接泄漏</li>
+            <li>观察连接等待队列是否回落</li>
+          </ul>
+        </div>
+
+        <!-- 编排调用链（可折叠） -->
+        <div class="card">
+          <div class="collapsible-header" aria-expanded="false"><span>🧬 编排调用链（供 SRE 二次核实）</span><span class="chevron">▾</span></div>
+          <div class="collapsible-content">
+            <pre class="code-block">intent: 排障诊断（置信度高）
+→ logquery.search(logType=CDN/WAF/LB, service=order-service, window=1h)
+→ diagnose.risk(federation result)   → risk=85 (high)
+→ llm.interpret(aggregates)          → 预算耗尽，降级为规则结论
+→ persist(session, report, citations)</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>injectSidebar(null); setupCollapsibles(document);</script>
+</body>
+</html>

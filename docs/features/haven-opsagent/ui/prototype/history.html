@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>历史诊断回溯 — Haven 运维 Agent</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar"></aside>
+    <div class="main-area">
+      <header class="topbar">
+        <div class="topbar-title">历史诊断回溯</div>
+      </header>
+
+      <div class="page">
+        <div class="breadcrumb"><a href="chat.html">对话排障</a><span class="sep">/</span><span>历史诊断回溯</span></div>
+
+        <!-- 补偿提示 -->
+        <div class="info-banner" role="status" style="margin-bottom:16px;">部分近期会话仍在补偿入库（3 条），暂不展示</div>
+
+        <!-- 检索条 -->
+        <div class="card" style="margin-bottom:16px;">
+          <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+            <div style="flex:0 1 160px;"><label class="field-label" for="h-tenant">租户</label><input class="input" id="h-tenant" value="jlc" disabled></div>
+            <div style="flex:1 1 220px;"><label class="field-label" for="h-range">时间窗（≤24h）</label><input class="input" id="h-range" placeholder="最近 24 小时"></div>
+            <div style="flex:1 1 200px;"><label class="field-label" for="h-svc">服务名</label><input class="input" id="h-svc" placeholder="如 order-service"></div>
+            <button class="btn" id="searchBtn">检索</button>
+          </div>
+          <div class="error-banner" id="rangeError" style="display:none;" role="alert">时间窗上限 24 小时，请缩小范围</div>
+        </div>
+
+        <!-- 会话列表视图 -->
+        <div id="listView">
+          <div class="card" style="padding:0; overflow:hidden;">
+            <table class="data-table">
+              <thead><tr><th>服务名</th><th>意图</th><th>触发来源</th><th>时间</th><th>降级</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr class="clickable alert-row">
+                  <td style="font-weight:500;">order-service</td>
+                  <td><span class="agent-chip 诊断">排障</span></td>
+                  <td><span class="badge badge-ghost">告警</span></td>
+                  <td style="font-family:monospace; font-size:12px;">09:45</td>
+                  <td>—</td>
+                  <td><button class="btn btn-sm btn-outline" data-open="s1">查看</button></td>
+                </tr>
+                <tr class="clickable alert-row">
+                  <td style="font-weight:500;">cdn-edge</td>
+                  <td><span class="agent-chip 诊断">排障</span></td>
+                  <td><span class="agent-chip 日志查询">对话</span></td>
+                  <td style="font-family:monospace; font-size:12px;">09:20</td>
+                  <td><span class="badge badge-muted tooltip-host" tabindex="0">降级<span class="tooltip">LLM 预算耗尽，纯规则结论</span></span></td>
+                  <td><button class="btn btn-sm btn-outline" data-open="s2">查看</button></td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="pagination" style="padding:14px 16px;">
+              <span style="font-size:12px;color:hsl(var(--muted-foreground));">共 2 条</span>
+              <span style="flex:1;"></span><button class="page-btn">‹</button><button class="page-btn current">1</button><button class="page-btn">›</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 会话内容视图（页内替换） -->
+        <div id="sessionView" style="display:none;">
+          <div class="breadcrumb"><a href="#" id="backToList">↩ 返回会话列表</a><span class="sep">/</span><span id="svBreadcrumb">会话</span></div>
+
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; margin-bottom:20px; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <h1 style="font-size:22px; font-weight:700;" id="svTitle">order-service</h1>
+              <span class="agent-chip 诊断">排障</span>
+              <span class="badge badge-ghost" id="svSource">告警</span>
+              <span style="font-family:monospace; font-size:12px; color:hsl(var(--muted-foreground));" id="svTime">09:45</span>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="location.href='diagnosis-detail.html'">查看详情</button>
+          </div>
+
+          <div class="card card-rca" style="margin-bottom:16px;">
+            <p style="font-size:12px; color:hsl(var(--muted-foreground)); margin-bottom:6px;">🔎 诊断报告</p>
+            <h2 style="font-size:18px; font-weight:700; margin-bottom:10px;" id="svRca">数据库连接池耗尽（置信度 85%）</h2>
+            <div class="collapsible-header"><span style="font-size:13px; color:hsl(var(--muted-foreground));">数据源引用（2）</span><span class="chevron">▾</span></div>
+            <div class="collapsible-content">
+              <div class="evidence-card">SLS 日志：order-service-prod "connection pool exhausted" 单分钟 230 条</div>
+              <div class="evidence-card">指标：postgres-order 活跃连接触顶 200/200</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:16px;">
+            <h3>💬 对话记录</h3>
+            <div style="display:flex; gap:12px; margin-bottom:12px;">
+              <div class="avatar">H</div>
+              <div class="bubble" style="background:hsl(var(--primary)); color:hsl(var(--primary-foreground)); border-radius:16px 16px 4px 16px; padding:12px 16px; font-size:13px;">order-service 最近一小时错误率上升，帮我看看</div>
+            </div>
+            <div style="display:flex; gap:12px;">
+              <div class="who-icon" style="width:32px; height:32px; border-radius:8px; background:hsl(var(--primary) / 0.18); border:1px solid hsl(var(--primary) / 0.35); display:flex; align-items:center; justify-content:center; font-size:14px; flex-shrink:0;">🎯</div>
+              <div style="background:hsl(var(--muted) / 0.4); border-radius:8px; padding:12px 16px; font-size:13px; color:hsl(var(--muted-foreground));">系统诊断回复：根因「数据库连接池耗尽」，建议扩容连接池…（完整内容见诊断报告）</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="collapsible-header"><span>🧬 编排调用链</span><span class="chevron">▾</span></div>
+            <div class="collapsible-content"><pre class="code-block">intent → logquery → diagnose → llm → persist</pre></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    injectSidebar('history');
+    setupCollapsibles(document);
+
+    var listView = document.getElementById('listView');
+    var sessionView = document.getElementById('sessionView');
+
+    function openSession(id) {
+      listView.style.display = 'none';
+      sessionView.style.display = 'block';
+      if (id === 's2') {
+        document.getElementById('svTitle').textContent = 'cdn-edge';
+        document.getElementById('svSource').textContent = '对话';
+        document.getElementById('svTime').textContent = '09:20';
+        document.getElementById('svRca').textContent = 'CC 刷量（置信度 90%）';
+        document.getElementById('svBreadcrumb').textContent = '会话 s2';
+      } else {
+        document.getElementById('svBreadcrumb').textContent = '会话 s1';
+      }
+    }
+    document.querySelectorAll('[data-open]').forEach(function (b) {
+      b.addEventListener('click', function () { openSession(b.dataset.open); window.scrollTo(0, 0); });
+    });
+    document.getElementById('backToList').addEventListener('click', function (e) {
+      e.preventDefault(); sessionView.style.display = 'none'; listView.style.display = 'block';
+    });
+    document.getElementById('searchBtn').addEventListener('click', function () {
+      var r = document.getElementById('h-range').value;
+      var err = document.getElementById('rangeError');
+      if (r && /(48h|7d|一周|月)/.test(r)) { err.style.display = 'block'; }
+      else { err.style.display = 'none'; toast('检索完成（原型演示）', 'success'); }
+    });
+  </script>
+</body>
+</html>

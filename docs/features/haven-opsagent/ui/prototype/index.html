@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Haven 运维 Agent — 原型导航</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar"></aside>
+    <div class="main-area">
+      <header class="topbar">
+        <div class="topbar-title">原型导航</div>
+        <span style="font-size:12px;color:hsl(var(--muted-foreground));">P1 排障核心闭环 · 4 页面</span>
+      </header>
+      <div class="page">
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap:16px;">
+          <a href="chat.html" style="display:block;">
+            <div class="card stat-card" style="height:100%;">
+              <div style="font-size:36px; margin-bottom:12px;">💬</div>
+              <h3>对话排障</h3>
+              <p style="font-size:13px;color:hsl(var(--muted-foreground));">/opsagent/chat —— 自然语言提问 → 编排思考过程 → 只读诊断报告（数据源引用、降级、截断徽标）</p>
+            </div>
+          </a>
+          <a href="risk-center.html" style="display:block;">
+            <div class="card stat-card" style="height:100%;">
+              <div style="font-size:36px; margin-bottom:12px;">🚨</div>
+              <h3>风险中心</h3>
+              <p style="font-size:13px;color:hsl(var(--muted-foreground));">/opsagent/risk-center —— 告警主动触发诊断待办：筛选、单条/批量标记、并发冲突、severity 分级</p>
+            </div>
+          </a>
+          <a href="diagnosis-detail.html" style="display:block;">
+            <div class="card stat-card" style="height:100%;">
+              <div style="font-size:36px; margin-bottom:12px;">🔍</div>
+              <h3>诊断详情</h3>
+              <p style="font-size:13px;color:hsl(var(--muted-foreground));">/opsagent/diagnosis/:id —— 根因结论（主视觉）、处置建议、编排调用链、证据卡</p>
+            </div>
+          </a>
+          <a href="history.html" style="display:block;">
+            <div class="card stat-card" style="height:100%;">
+              <div style="font-size:36px; margin-bottom:12px;">🕘</div>
+              <h3>历史诊断回溯</h3>
+              <p style="font-size:13px;color:hsl(var(--muted-foreground));">/opsagent/history —— 历史会话检索（≤24h）+ 会话内容视图（含编排调用链）</p>
+            </div>
+          </a>
+          <a href="agent-management.html" style="display:block;">
+            <div class="card stat-card" style="height:100%;">
+              <div style="font-size:36px; margin-bottom:12px;">🤖</div>
+              <h3>Agent 管理</h3>
+              <p style="font-size:13px;color:hsl(var(--muted-foreground));">Multi-Agent 系统 —— 4 个子智能体运行状态、负载历史、任务队列、性能指标</p>
+            </div>
+          </a>
+          <a href="settings.html" style="display:block;">
+            <div class="card stat-card" style="height:100%;">
+              <div style="font-size:36px; margin-bottom:12px;">⚙️</div>
+              <h3>系统配置</h3>
+              <p style="font-size:13px;color:hsl(var(--muted-foreground));">数据源 / LLM 模型 / 通知渠道 / 安全与租户（4 个 tab）</p>
+            </div>
+          </a>
+          <a href="topology.html" style="display:block;">
+            <div class="card stat-card" style="height:100%;">
+              <div style="font-size:36px; margin-bottom:12px;">🕸️</div>
+              <h3>拓扑视图</h3>
+              <p style="font-size:13px;color:hsl(var(--muted-foreground));">服务依赖关系图 + 故障传播路径 + 节点健康状态</p>
+            </div>
+          </a>
+          <a href="rca.html" style="display:block;">
+            <div class="card stat-card" style="height:100%;">
+              <div style="font-size:36px; margin-bottom:12px;">🔎</div>
+              <h3>RCA 分析</h3>
+              <p style="font-size:13px;color:hsl(var(--muted-foreground));">根因分析报告：根因结论 + 证据 + 多维度评分 + 候选假设</p>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="app.js"></script>
+  <script>injectSidebar(null);</script>
+</body>
+</html>

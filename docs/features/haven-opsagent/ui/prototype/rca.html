@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RCA 分析 — Haven 运维 Agent</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar"></aside>
+    <div class="main-area">
+      <header class="topbar">
+        <div class="topbar-title">RCA 分析</div>
+        <div class="topbar-actions">
+          <button class="btn" onclick="location.href='chat.html'">＋ 新建分析</button>
+        </div>
+      </header>
+
+      <div class="page">
+        <!-- ===== 列表视图 ===== -->
+        <div id="listView">
+          <div class="page-header">
+            <h1>根因分析报告</h1>
+            <p class="subtitle">故障诊断与根因结论（对应 diagnose 引擎 + 编排层）</p>
+          </div>
+          <div class="card" style="padding:0; overflow:hidden;">
+            <table class="data-table">
+              <thead><tr><th>事件 ID</th><th>严重性</th><th>描述</th><th>受影响服务</th><th>置信度</th><th>状态</th><th>操作</th></tr></thead>
+              <tbody>
+                <tr class="clickable alert-row" data-rca="0">
+                  <td style="font-family:monospace; font-size:12px;">RCA-001</td>
+                  <td><span class="badge badge-low">P1</span></td>
+                  <td>order-service 错误率激增至 2.5%</td>
+                  <td><span class="badge badge-ghost">order-service</span> <span class="badge badge-ghost">postgres-order</span></td>
+                  <td><span style="font-weight:600; color:hsl(var(--primary));">92%</span></td>
+                  <td><span class="badge badge-ok">已完成</span></td>
+                  <td><button class="btn btn-sm btn-outline" data-open="0">查看</button></td>
+                </tr>
+                <tr class="clickable alert-row" data-rca="1">
+                  <td style="font-family:monospace; font-size:12px;">RCA-002</td>
+                  <td><span class="badge badge-high">P0</span></td>
+                  <td>payment-gateway 连接失败，全链路不可用</td>
+                  <td><span class="badge badge-ghost">payment-gateway</span></td>
+                  <td><span style="color:hsl(var(--muted-foreground));">—</span></td>
+                  <td><span class="badge badge-primary"><span class="pulse-dot"></span>分析中</span></td>
+                  <td><button class="btn btn-sm btn-outline" data-open="1">查看</button></td>
+                </tr>
+                <tr class="clickable alert-row" data-rca="2">
+                  <td style="font-family:monospace; font-size:12px;">RCA-003</td>
+                  <td><span class="badge badge-ok">P2</span></td>
+                  <td>redis-cache 短暂抖动，命中率下降</td>
+                  <td><span class="badge badge-ghost">redis-cache</span></td>
+                  <td><span style="font-weight:600; color:hsl(var(--primary));">87%</span></td>
+                  <td><span class="badge badge-ok">已完成</span></td>
+                  <td><button class="btn btn-sm btn-outline" data-open="2">查看</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ===== 详情视图 ===== -->
+        <div id="detailView" style="display:none;">
+          <div class="breadcrumb"><a href="#" id="backToList">↩ RCA 列表</a><span class="sep">/</span><span>RCA-001 详情</span></div>
+
+          <!-- Incident 信息 -->
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-header"><h3>Incident 信息</h3></div>
+            <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:16px; margin-bottom:16px;">
+              <div><p style="font-size:12px; color:hsl(var(--muted-foreground)); margin-bottom:4px;">严重性</p><span class="badge badge-low">P1</span></div>
+              <div><p style="font-size:12px; color:hsl(var(--muted-foreground)); margin-bottom:4px;">状态</p><span class="badge badge-ok">已完成</span></div>
+              <div><p style="font-size:12px; color:hsl(var(--muted-foreground)); margin-bottom:4px;">时间范围</p><span style="font-size:13px;">10:00 - 11:00</span></div>
+              <div><p style="font-size:12px; color:hsl(var(--muted-foreground)); margin-bottom:4px;">来源</p><span style="font-size:13px;">告警触发</span></div>
+            </div>
+            <div style="margin-bottom:12px;">
+              <p style="font-size:12px; color:hsl(var(--muted-foreground)); margin-bottom:6px;">受影响服务</p>
+              <div style="display:flex; gap:8px;"><span class="badge badge-ghost">order-service</span><span class="badge badge-ghost">postgres-order</span></div>
+            </div>
+            <p style="font-size:13px; color:hsl(var(--muted-foreground));">order-service 出现异常延迟，错误率从 0.1% 激增至 2.5%</p>
+          </div>
+
+          <!-- 根因结论 -->
+          <div class="card card-card-rca" style="margin-bottom:16px; padding:24px;">
+            <p style="font-size:12px; color:hsl(var(--muted-foreground)); margin-bottom:6px;">🔎 根因结论</p>
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px; flex-wrap:wrap;">
+              <h2 style="font-size:20px; font-weight:700;">postgres-order 数据库连接池耗尽</h2>
+              <span class="badge badge-primary">置信度 92%</span>
+            </div>
+            <p style="font-size:13px; font-weight:500; margin-bottom:14px;">连接池耗尽 → order-service 请求超时 → 错误率级联上升</p>
+            <div class="collapsible-header"><span style="font-size:13px; color:hsl(var(--muted-foreground));">📊 证据（6）</span><span class="chevron">▾</span></div>
+            <div class="collapsible-content">
+              <div class="evidence-card"><div class="evidence-card-header"><span class="dot" style="background:hsl(var(--agent-log));"></span>时间相关</div>连接池等待时间 10:05:23 从 5ms → 2500ms（500x）</div>
+              <div class="evidence-card"><div class="evidence-card-header"><span class="dot" style="background:hsl(var(--agent-log));"></span>错误频率</div>order-service 日志 89% 含 "acquire timeout"</div>
+              <div class="evidence-card"><div class="evidence-card-header"><span class="dot" style="background:hsl(var(--agent-monitor));"></span>指标异常</div>active_connections 持续 3 个窗口异常</div>
+              <div class="evidence-card"><div class="evidence-card-header"><span class="dot" style="background:hsl(var(--agent-inspector));"></span>拓扑距离</div>postgres-order 是 order-service 直接依赖（距离 1）</div>
+              <div class="evidence-card"><div class="evidence-card-header"><span class="dot" style="background:hsl(var(--severity-low));"></span>变更关联</div>10:00 前 2 小时无部署变更</div>
+              <div class="evidence-card"><div class="evidence-card-header"><span class="dot" style="background:hsl(var(--agent-inspector));"></span>Trace</div>34% payment-service trace 含错误</div>
+            </div>
+          </div>
+
+          <!-- 多维度评分 -->
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-header"><h3>多维度评分详情</h3></div>
+            <div id="scoreBars"></div>
+            <div style="text-align:center; padding-top:16px; border-top:1px solid hsl(var(--border)); margin-top:16px;">
+              <span style="font-size:13px; color:hsl(var(--muted-foreground));">总分 92.0 → 置信度 <strong style="color:hsl(var(--primary));">92%</strong></span>
+            </div>
+          </div>
+
+          <!-- 其他候选假设 -->
+          <div class="card">
+            <div class="card-header"><h3>其他候选假设</h3></div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="padding:14px; border-radius:8px; background:hsl(var(--muted) / 0.3); border:1px solid hsl(var(--border));">
+                <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;"><span style="color:hsl(var(--muted-foreground));">2.</span><span class="badge badge-low">🟡</span><span style="font-weight:600;">network-ingress-latency-spike</span><span class="badge badge-ghost" style="margin-left:auto;">置信度 35%</span></div>
+                <p style="font-size:13px; color:hsl(var(--muted-foreground));">入口网络延迟尖峰，但未观测到 LB 层异常</p>
+              </div>
+              <div style="padding:14px; border-radius:8px; background:hsl(var(--muted) / 0.3); border:1px solid hsl(var(--border));">
+                <div style="display:flex; gap:8px; align-items:center; margin-bottom:6px;"><span style="color:hsl(var(--muted-foreground));">3.</span><span class="badge badge-ghost">⚪</span><span style="font-weight:600;">recent-deployment-regression</span><span class="badge badge-ghost" style="margin-left:auto;">置信度 18%</span></div>
+                <p style="font-size:13px; color:hsl(var(--muted-foreground));">最近部署回退，但时间窗内无变更记录</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    injectSidebar(null);
+    setupCollapsibles(document);
+
+    var bars = [
+      { name: '时间相关性', score: 95, color: 'hsl(var(--agent-log))', note: 'Trend: up → up (match 100%)' },
+      { name: '拓扑距离', score: 80, color: 'hsl(var(--agent-monitor))', note: 'Distance: direct (score 1.0)' },
+      { name: '错误频率', score: 90, color: 'hsl(var(--severity-high))', note: 'Ratio: 89% 含 acquire timeout' },
+      { name: '变更关联', score: 70, color: 'hsl(var(--severity-low))', note: 'Last change: 2h ago (decay 0.5)' },
+      { name: '指标异常', score: 85, color: 'hsl(var(--agent-inspector))', note: 'Windows: 3/3 (severity 1.0)' },
+      { name: 'Trace 证据', score: 50, color: 'hsl(var(--agent-coord))', note: 'Error rate: 34% of traces' },
+    ];
+    document.getElementById('scoreBars').innerHTML = bars.map(function (b) {
+      return '<div style="margin-bottom:14px;">' +
+        '<div style="display:flex; justify-content:space-between; margin-bottom:6px;"><span style="font-size:13px; font-weight:500;">' + b.name + '</span><span style="font-size:13px; color:hsl(var(--muted-foreground)); font-family:monospace;">' + (b.score / 10).toFixed(1) + '</span></div>' +
+        '<div class="progress-track"><div class="progress-fill" style="width:' + b.score + '%; background:' + b.color + ';"></div></div>' +
+        '<p style="font-size:12px; color:hsl(var(--muted-foreground)); margin-top:4px;">' + b.note + '</p>' +
+      '</div>';
+    }).join('');
+
+    var listView = document.getElementById('listView');
+    var detailView = document.getElementById('detailView');
+    document.querySelectorAll('[data-open]').forEach(function (b) {
+      b.addEventListener('click', function () { listView.style.display = 'none'; detailView.style.display = 'block'; window.scrollTo(0, 0); });
+    });
+    document.getElementById('backToList').addEventListener('click', function (e) {
+      e.preventDefault(); detailView.style.display = 'none'; listView.style.display = 'block';
+    });
+  </script>
+</body>
+</html>

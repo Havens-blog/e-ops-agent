@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>拓扑视图 — Haven 运维 Agent</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar"></aside>
+    <div class="main-area">
+      <header class="topbar">
+        <div class="topbar-title">拓扑视图</div>
+        <div class="topbar-actions">
+          <button class="btn btn-outline btn-sm" onclick="toast('拓扑已刷新（原型演示）','success')">↻ 刷新</button>
+        </div>
+      </header>
+
+      <div class="page">
+        <div class="page-header">
+          <h1>服务拓扑</h1>
+          <p class="subtitle">服务依赖关系与故障传播路径 · 点击节点查看详情</p>
+        </div>
+
+        <!-- 图例 -->
+        <div style="display:flex; gap:16px; flex-wrap:wrap; margin-bottom:16px; font-size:12px;">
+          <span style="display:flex; align-items:center; gap:6px;"><span class="status-dot connected"></span><span style="color:hsl(var(--muted-foreground));">健康</span></span>
+          <span style="display:flex; align-items:center; gap:6px;"><span class="status-dot" style="background:hsl(var(--severity-low));"></span><span style="color:hsl(var(--muted-foreground));">降级</span></span>
+          <span style="display:flex; align-items:center; gap:6px;"><span class="status-dot" style="background:hsl(var(--severity-high));"></span><span style="color:hsl(var(--muted-foreground));">异常</span></span>
+          <span style="display:flex; align-items:center; gap:6px;"><span style="display:inline-block; width:12px; height:12px; border-radius:3px; background:none; border:2px solid hsl(var(--primary));"></span><span style="color:hsl(var(--muted-foreground));">服务</span></span>
+          <span style="display:flex; align-items:center; gap:6px;"><span style="display:inline-block; width:14px; height:8px; border-radius:50%/50%; background:none; border:2px solid hsl(var(--agent-log));"></span><span style="color:hsl(var(--muted-foreground));">数据库</span></span>
+          <span style="display:flex; align-items:center; gap:6px;"><span style="display:inline-block; width:12px; height:12px; background:none; border:2px solid hsl(var(--agent-monitor)); transform:rotate(45deg);"></span><span style="color:hsl(var(--muted-foreground));">缓存</span></span>
+        </div>
+
+        <!-- 拓扑画布 -->
+        <div class="card" style="padding:0; overflow:hidden;">
+          <svg viewBox="0 0 900 520" style="width:100%; height:auto; display:block;">
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                <path d="M0,0 L10,5 L0,10 z" fill="hsl(var(--muted-foreground))"/>
+              </marker>
+            </defs>
+            <!-- 边（依赖关系） -->
+            <g stroke="hsl(var(--muted-foreground))" stroke-width="1.5" marker-end="url(#arrow)" opacity="0.55">
+              <path d="M150,260 L300,160" />
+              <path d="M150,260 L300,360" />
+              <path d="M150,260 L300,480" />
+              <path d="M480,160 L620,220" stroke="hsl(var(--severity-low))" stroke-width="2.5" />
+              <path d="M480,160 L620,370" />
+              <path d="M480,480 L620,370" />
+              <path d="M300,360 L620,220" opacity="0.25" stroke-dasharray="4 3" />
+            </g>
+            <!-- 节点 -->
+            <g id="n-api" class="topo-node" style="cursor:pointer;" transform="translate(60,260)">
+              <rect x="0" y="0" width="0" height="0" fill="transparent"/>
+            </g>
+          </svg>
+          <div id="topo" style="position:relative; min-height:520px;">
+
+          </div>
+        </div>
+
+        <!-- 选中节点详情 -->
+        <div class="card" style="margin-top:16px;" id="nodeDetail">
+          <div class="card-header" style="margin-bottom:8px;"><h3 id="ndTitle">选中节点查看明细</h3></div>
+          <div id="ndBody" style="font-size:13px; color:hsl(var(--muted-foreground));">点击拓扑中的节点查看服务详情、依赖关系与指标。</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    injectSidebar('topology');
+
+    var nodes = [
+      { id: 'api-gateway', name: 'api-gateway', type: 'service', health: 'healthy', x: 60, y: 260, error: '0.1%', latency: '45ms', qps: 1250 },
+      { id: 'order-service', name: 'order-service', type: 'service', health: 'degraded', x: 300, y: 160, error: '2.5%', latency: '120ms', qps: 850 },
+      { id: 'payment-service', name: 'payment-service', type: 'service', health: 'healthy', x: 300, y: 360, error: '0.2%', latency: '85ms', qps: 320 },
+      { id: 'user-service', name: 'user-service', type: 'service', health: 'healthy', x: 300, y: 480, error: '0.1%', latency: '35ms', qps: 1500 },
+      { id: 'postgres-order', name: 'postgres-order', type: 'database', health: 'degraded', x: 620, y: 220, error: '1.5%', latency: '25ms', qps: 1200 },
+      { id: 'redis-cache', name: 'redis-cache', type: 'cache', health: 'healthy', x: 620, y: 370, error: '0%', latency: '2.5ms', qps: 5000 },
+    ];
+
+    var colors = { healthy: 'hsl(var(--severity-ok))', degraded: 'hsl(var(--severity-low))', unhealthy: 'hsl(var(--severity-high))' };
+
+    var topo = document.getElementById('topo');
+    topo.style.height = '520px';
+
+    // 用绝对定位 + CSS 画节点（比纯 SVG 更易交互）
+    var html = '';
+    // 边
+    html += '<svg viewBox="0 0 900 520" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none;">' +
+      '<defs><marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="hsl(var(--muted-foreground))"/></marker></defs>' +
+      '<g stroke="hsl(var(--muted-foreground))" stroke-width="1.5" marker-end="url(#arrow)" opacity="0.5">' +
+      '<path d="M180,280 L310,190"/>' +
+      '<path d="M180,280 L310,380"/>' +
+      '<path d="M180,280 L310,500"/>' +
+      '<path d="M460,190 L610,240" stroke="hsl(var(--severity-low))" stroke-width="2.5"/>' +
+      '<path d="M460,190 L610,390"/>' +
+      '<path d="M460,500 L610,390"/>' +
+      '<path d="M310,380 L610,240" opacity="0.3" stroke-dasharray="4 3" marker-end="none"/>' +
+      '</g></svg>';
+
+    nodes.forEach(function (n) {
+      var c = colors[n.health];
+      var nodeStyle = n.type === 'database'
+        ? 'width:120px; height:44px; border-radius:22px;'  // cylinder
+        : n.type === 'cache'
+          ? 'width:100px; height:100px; border-radius:8px; transform:rotate(45deg);'
+          : 'width:130px; height:50px; border-radius:8px;';
+      var inner = n.type === 'cache' ? '<div style="transform:rotate(-45deg);">' + n.name + '</div>' : n.name;
+      var healthLabel = { healthy: '健康', degraded: '降级', unhealthy: '异常' }[n.health];
+      html += '<div class="topo-node" data-id="' + n.id + '" tabindex="0" role="button" aria-label="' + n.name + ' ' + healthLabel + '" style="position:absolute; left:' + n.x + 'px; top:' + n.y + 'px; ' + nodeStyle + ' background:hsl(var(--card)); border:2px solid ' + c + '; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; cursor:pointer; transition:box-shadow 0.15s;">' +
+        inner +
+      '</div>';
+    });
+    topo.innerHTML = html;
+
+    // 节点点击 → 详情
+    topo.querySelectorAll('.topo-node').forEach(function (el) {
+      el.addEventListener('click', function () { showDetail(el.dataset.id); });
+      el.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); showDetail(el.dataset.id); } });
+      el.addEventListener('mouseenter', function () { el.style.boxShadow = '0 0 0 4px ' + colors[nodes.find(function (n) { return n.id === el.dataset.id; }).health] + ' / 0.25'; });
+      el.addEventListener('mouseleave', function () { el.style.boxShadow = 'none'; });
+    });
+
+    function showDetail(id) {
+      var n = nodes.find(function (x) { return x.id === id; });
+      var typeText = { service: '服务', database: '数据库', cache: '缓存' }[n.type];
+      var hText = { healthy: '健康', degraded: '降级', unhealthy: '异常' }[n.health];
+      document.getElementById('ndTitle').textContent = n.name;
+      document.getElementById('ndBody').innerHTML =
+        '<div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:12px;">' +
+          '<span><span class="badge badge-ghost">' + typeText + '</span> <span class="badge ' + (n.health === 'healthy' ? 'badge-ok' : n.health === 'degraded' ? 'badge-low' : 'badge-high') + '">' + hText + '</span></span>' +
+          '<span>错误率 <strong>' + n.error + '</strong></span>' +
+          '<span>延迟 <strong>' + n.latency + '</strong></span>' +
+          '<span>吞吐 <strong>' + n.qps + ' qps</strong></span>' +
+        '</div>' +
+        '<p>依赖关系：' + (deps[id] || '—') + '</p>';
+    }
+
+    var deps = {
+      'api-gateway': '上游入口，依赖 order-service / payment-service / user-service',
+      'order-service': '依赖 postgres-order（数据库）+ redis-cache（缓存），当前「降级」',
+      'payment-service': '依赖网关，健康',
+      'user-service': '依赖 redis-cache，健康',
+      'postgres-order': '被 order-service 依赖，「降级」——疑似连接池问题',
+      'redis-cache': '被 order-service / user-service 依赖，健康',
+    };
+  </script>
+</body>
+</html>

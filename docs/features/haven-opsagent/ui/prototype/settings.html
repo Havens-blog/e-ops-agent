@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>系统配置 — Haven 运维 Agent</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar"></aside>
+    <div class="main-area">
+      <header class="topbar">
+        <div class="topbar-title">系统配置</div>
+        <div class="topbar-actions">
+          <button class="btn" onclick="toast('配置已保存（原型演示）','success')">保存配置</button>
+        </div>
+      </header>
+
+      <div class="page" style="max-width:900px;">
+        <div class="page-header">
+          <h1>系统配置</h1>
+          <p class="subtitle">数据源、LLM 模型、通知渠道、租户与安全</p>
+        </div>
+
+        <!-- Tab 列表 -->
+        <div class="tab-list" role="tablist" aria-label="系统配置">
+          <button class="tab-btn active" role="tab" data-tab="ds" aria-selected="true">数据源配置</button>
+          <button class="tab-btn" role="tab" data-tab="llm" aria-selected="false">LLM 模型</button>
+          <button class="tab-btn" role="tab" data-tab="im" aria-selected="false">通知渠道</button>
+          <button class="tab-btn" role="tab" data-tab="sec" aria-selected="false">安全与租户</button>
+        </div>
+
+        <!-- ===== Tab 1: 数据源配置 ===== -->
+        <div class="tab-panel active" id="tab-ds" role="tabpanel">
+          <div id="dsList"></div>
+        </div>
+
+        <!-- ===== Tab 2: LLM 模型 ===== -->
+        <div class="tab-panel" id="tab-llm" role="tabpanel">
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-header"><h3>模型提供商</h3></div>
+            <div id="providerList"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>API 配置</h3></div>
+            <div class="form-row">
+              <label for="apiKey">API Key <span class="req">*</span></label>
+              <input class="input" id="apiKey" type="password" value="sk-ant-xxxxxxxxxxxx">
+              <div class="form-hint">密钥不落代码/配置仓，从环境变量注入（对应 Haven `LOGQUERY_LLM_API_KEY`）</div>
+            </div>
+            <div class="form-row">
+              <label for="apiBase">API Endpoint（可选）</label>
+              <input class="input" id="apiBase" placeholder="默认：https://dashscope.aliyuncs.com/compatible-mode/v1">
+              <div class="form-hint">自定义代理地址可留空</div>
+            </div>
+            <div class="form-row" style="margin-bottom:0;">
+              <label>默认模型</label>
+              <select class="input">
+                <option>qwen-plus（推荐）</option>
+                <option>qwen-max</option>
+                <option>qwen-turbo</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- ===== Tab 3: 通知渠道 ===== -->
+        <div class="tab-panel" id="tab-im" role="tabpanel">
+          <div id="imList"></div>
+        </div>
+
+        <!-- ===== Tab 4: 安全与租户 ===== -->
+        <div class="tab-panel" id="tab-sec" role="tabpanel">
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-header"><h3>多租户隔离</h3></div>
+            <div class="form-row" style="margin-bottom:12px;">
+              <div style="display:flex; align-items:center; justify-content:space-between;">
+                <div><div style="font-size:13px; font-weight:500;">强制租户上下文注入</div><div class="form-hint">tenant 一律由服务端从 eiam 会话派生并强制覆盖，LLM 输出中的租户字段丢弃</div></div>
+                <button class="switch" role="switch" aria-checked="true" aria-label="强制租户注入"></button>
+              </div>
+            </div>
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0;">
+              <div><div style="font-size:13px; font-weight:500;">LLM 回复引用校验</div><div class="form-hint">越界引用一律丢弃，不得回显未授权数据</div></div>
+              <button class="switch" role="switch" aria-checked="true" aria-label="引用校验"></button>
+            </div>
+          </div>
+          <div class="card" style="margin-bottom:16px;">
+            <div class="card-header"><h3>风险分级白名单（写操作）</h3></div>
+            <p style="font-size:13px; color:hsl(var(--muted-foreground)); margin-bottom:12px;">风险分级由确定性代码（工具元数据注册表 + 白名单匹配）完成，LLM 输出不得改变风险档位。</p>
+            <div class="data-table" style="border:1px solid hsl(var(--border)); border-radius:8px; overflow:hidden;">
+              <table class="data-table">
+                <thead><tr><th>操作</th><th>风险档</th><th>处置</th></tr></thead>
+                <tbody>
+                  <tr><td>查日志 / 资产 / 告警</td><td><span class="badge badge-ok">只读</span></td><td>自动执行</td></tr>
+                  <tr><td>开只读快照</td><td><span class="badge badge-low">低危</span></td><td>白名单自动执行</td></tr>
+                  <tr><td>重启 / 回滚 / 封禁 IP / 删除</td><td><span class="badge badge-high">高危</span></td><td>人工确认后执行（P3）</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h3>底座接口契约</h3></div>
+            <p style="font-size:13px; color:hsl(var(--muted-foreground)); margin-bottom:8px;">编排层仅依赖契约文档所列接口；契约测试在 CI 守护接口漂移（P1 显式交付物）。</p>
+            <div style="display:flex; flex-direction:column; gap:6px; font-size:13px;">
+              <div style="display:flex; justify-content:space-between;"><span>logquery（日志+诊断）</span><span class="badge badge-primary">已冻结 v1.2</span></div>
+              <div style="display:flex; justify-content:space-between;"><span>alert（告警）</span><span class="badge badge-primary">已冻结 v1.0</span></div>
+              <div style="display:flex; justify-content:space-between;"><span>资产 / MCP</span><span class="badge badge-primary">已冻结 v1.0</span></div>
+              <div style="display:flex; justify-content:space-between;"><span>eiam（鉴权 + 租户）</span><span class="badge badge-primary">已冻结 v0.20</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    injectSidebar('settings');
+
+    // Tab 切换
+    document.querySelectorAll('.tab-btn').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+        document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+        btn.classList.add('active'); btn.setAttribute('aria-selected', 'true');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // 数据源列表
+    var datasources = [
+      { key: 'logquery', icon: 'LOG', grad: 'hsl(var(--agent-log))', name: '多云日志查询', desc: 'CDN / WAF / LB 日志联邦查询 + 刷量诊断（阿里 SLS / 华为 LTS / AWS S3 / 腾讯 CLS）', connected: true, fields: ['日志类型：CDN / WAF / LB', '云厂商：阿里云 / 华为云 / AWS / 腾讯云', '查询模式：联邦实时（不落库）'] },
+      { key: 'alert', icon: 'AL', grad: 'hsl(var(--agent-monitor))', name: '告警链路', desc: '多渠道告警 + 变更检测（钉钉 / 飞书 / 企微 / 邮件）', connected: true, fields: ['告警源：阈值规则 + 变更检测', '通知渠道：钉钉 / 飞书 / 企微 / 邮件'] },
+      { key: 'asset', icon: 'CM', grad: 'hsl(var(--primary))', name: '资产 / CMDB', desc: '多云资产同步（ECS/RDS/Redis/EIP/NAS/OSS 等）+ ecmdb CMDB', connected: true, fields: ['资源类型：ECS / RDS / Redis / EIP / NAS / OSS', '查询：MCP Tools + 内部接口'] },
+      { key: 'topology', icon: 'TO', grad: 'hsl(var(--agent-inspector))', name: '服务拓扑', desc: 'dns / k8s 采集 + 图模型（依赖关系、故障传播）', connected: true, fields: ['采集：dns_collector / k8s_collector', '模型：node / edge / graph'] },
+      { key: 'audit', icon: 'AU', grad: 'hsl(var(--severity-low))', name: '变更与审计', desc: '审计留痕 + 变更单审计（change / change_order_audit）', connected: true, fields: ['审计：操作留痕', '变更：变更单审计 + 变更检测'] },
+    ];
+    var dsList = document.getElementById('dsList');
+    dsList.innerHTML = datasources.map(function (ds, i) {
+      return '<div class="ds-card">' +
+        '<div class="ds-card-head" data-idx="' + i + '" role="button" aria-expanded="false">' +
+          '<div style="display:flex; align-items:center; gap:12px;">' +
+            '<div class="ds-icon" style="background:' + ds.grad + ';">' + ds.icon + '</div>' +
+            '<div class="ds-meta"><h3>' + ds.name + '</h3><p>' + ds.desc + '</p></div>' +
+          '</div>' +
+          '<div style="display:flex; align-items:center; gap:12px;">' +
+            '<span style="display:flex; align-items:center; gap:6px; font-size:12px; color:hsl(var(--muted-foreground));"><span class="status-dot connected"></span>已连接</span>' +
+            '<span class="chevron">▾</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="ds-panel"><ul style="list-style:none; font-size:13px; line-height:2;">' +
+          ds.fields.map(function (f) { return '<li style="color:hsl(var(--muted-foreground));">· ' + f + '</li>'; }).join('') +
+        '</ul></div>' +
+      '</div>';
+    }).join('');
+    dsList.querySelectorAll('.ds-card-head').forEach(function (h) {
+      h.addEventListener('click', function () {
+        var p = h.parentElement.querySelector('.ds-panel');
+        var open = p.classList.toggle('open');
+        h.setAttribute('aria-expanded', open ? 'true' : 'false');
+      });
+    });
+
+    // 模型提供商
+    var providers = [
+      { key: 'qwen', letter: 'Q', grad: 'linear-gradient(135deg, #3b82f6, #4f46e5)', name: '阿里云通义千问', site: 'dashscope.aliyun.com', default: true },
+      { key: 'deepseek', letter: 'D', grad: 'linear-gradient(135deg, #0ea5e9, #6366f1)', name: 'DeepSeek', site: 'api.deepseek.com', default: false },
+      { key: 'openai', letter: 'O', grad: 'linear-gradient(135deg, #10b981, #14b8a6)', name: 'OpenAI GPT', site: 'openai.com', default: false },
+    ];
+    var pl = document.getElementById('providerList');
+    pl.innerHTML = providers.map(function (p) {
+      return '<div class="provider-card' + (p.default ? ' selected' : '') + '" data-key="' + p.key + '" role="radio" aria-checked="' + (p.default ? 'true' : 'false') + '" tabindex="0">' +
+        '<div class="ds-icon" style="background:' + p.grad + ';">' + p.letter + '</div>' +
+        '<div style="flex:1;"><div style="font-size:13px; font-weight:600;">' + p.name + '</div><div style="font-size:12px; color:hsl(var(--muted-foreground));">' + p.site + '</div></div>' +
+        '<span class="status-dot ' + (p.default ? 'connected' : 'disconnected') + '"></span>' +
+      '</div>';
+    }).join('');
+    pl.querySelectorAll('.provider-card').forEach(function (c) {
+      c.addEventListener('click', function () {
+        pl.querySelectorAll('.provider-card').forEach(function (x) { x.classList.remove('selected'); x.setAttribute('aria-checked', 'false'); x.querySelector('.status-dot').className = 'status-dot disconnected'; });
+        c.classList.add('selected'); c.setAttribute('aria-checked', 'true'); c.querySelector('.status-dot').className = 'status-dot connected';
+      });
+    });
+
+    // 通知渠道
+    var ims = [
+      { name: '钉钉', icon: '钉', grad: 'linear-gradient(135deg, #0ea5e9, #0284c7)', on: true, desc: '值班群机器人 webhook' },
+      { name: '飞书', icon: '飞', grad: 'linear-gradient(135deg, #06b6d4, #0ea5e9)', on: true, desc: '告警通知机器人' },
+      { name: '企业微信', icon: '企', grad: 'linear-gradient(135deg, #22c55e, #16a34a)', on: false, desc: '运维群 webhook' },
+      { name: '邮件', icon: '邮', grad: 'linear-gradient(135deg, #f59e0b, #ea580c)', on: true, desc: 'SMTP · 值班邮箱列表' },
+    ];
+    var imList = document.getElementById('imList');
+    imList.innerHTML = ims.map(function (im, i) {
+      return '<div class="card" style="margin-bottom:12px; padding:16px;">' +
+        '<div style="display:flex; align-items:center; gap:12px;">' +
+          '<div class="ds-icon" style="background:' + im.grad + ';">' + im.icon + '</div>' +
+          '<div style="flex:1;"><div style="font-size:13px; font-weight:600;">' + im.name + '</div><div style="font-size:12px; color:hsl(var(--muted-foreground));">' + im.desc + '</div></div>' +
+          '<button class="switch" role="switch" aria-checked="' + (im.on ? 'true' : 'false') + '" aria-label="' + im.name + ' 开关" data-im="' + i + '"></button>' +
+        '</div></div>';
+    }).join('');
+    imList.querySelectorAll('.switch').forEach(function (s) {
+      s.addEventListener('click', function () {
+        var on = s.getAttribute('aria-checked') === 'true';
+        s.setAttribute('aria-checked', on ? 'false' : 'true');
+        toast(ims[s.dataset.im].name + (on ? ' 已关闭' : ' 已启用'), 'success');
+      });
+    });
+
+    // 安全 tab 里的开关
+    document.querySelectorAll('#tab-sec .switch').forEach(function (s) {
+      s.addEventListener('click', function () {
+        var on = s.getAttribute('aria-checked') === 'true';
+        s.setAttribute('aria-checked', on ? 'false' : 'true');
+      });
+    });
+  </script>
+</body>
+</html>

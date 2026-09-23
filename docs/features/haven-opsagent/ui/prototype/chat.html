@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>对话排障 — Haven 运维 Agent</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar"></aside>
+    <div class="main-area">
+      <header class="topbar">
+        <div class="topbar-title">对话排障 <span class="agent-chip 编排">编排层</span></div>
+        <div class="topbar-actions">
+          <button class="btn btn-ghost btn-sm" onclick="location.href='history.html'">🕘 历史诊断</button>
+        </div>
+      </header>
+
+      <div class="page" style="max-width:1080px;">
+        <div class="chat-scroll" id="chatScroll">
+          <!-- 空态 -->
+          <div class="empty-state" id="emptyState">
+            <div class="icon">💬</div>
+            <h3 style="margin-bottom:8px;">有什么故障需要排查？</h3>
+            <p style="margin-bottom:16px;">试试下面的示例，或直接输入你的问题</p>
+            <div class="suggestion-chips">
+              <button class="chip" data-q="order-service 最近一小时错误率上升，帮我看看">order-service 错误率上升</button>
+              <button class="chip" data-q="最近 CDN 有没有被刷？">CDN 是否被刷</button>
+              <button class="chip" data-q="cdn-edge 服务最近 30 分钟流量突增">CDN 流量突增</button>
+            </div>
+          </div>
+          <!-- 对话流 -->
+          <div id="messages"></div>
+        </div>
+      </div>
+
+      <div class="chat-input-bar">
+        <div class="page" style="max-width:1080px; padding-top:0; padding-bottom:0;">
+          <div class="chat-input-inner">
+            <label for="chatInput" style="position:absolute;left:-9999px;">提问输入框</label>
+            <input class="input" id="chatInput" aria-label="提问输入框" placeholder="描述故障现象，如：某服务最近一小时错误率上升…" maxlength="500">
+            <button class="btn" id="sendBtn" style="height:42px;">发送</button>
+          </div>
+          <div class="chat-hint"><span id="charCount">0/500</span> · 当前模式：<span id="modeHint">正常</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 降级模式 Dialog（演示） -->
+  <div class="dialog-overlay" id="degradeDialog" role="dialog" aria-modal="true" aria-label="降级模式">
+    <div class="dialog">
+      <h3>⚠️ 进入降级模式</h3>
+      <p style="font-size:13px;color:hsl(var(--muted-foreground)); margin-bottom:8px;">LLM 意图识别不可用，已退化为模板/正则匹配 + 预置查询入口。以下能力当前不可用：自由转述提问、复杂多工具编排。</p>
+      <div class="dialog-actions"><button class="btn" data-action="close-dialog">知道了</button></div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    injectSidebar('chat');
+
+    var mockReports = {
+      order: {
+        rootCause: '数据库连接池耗尽', confidence: '85%',
+        advice: ['立即扩容 order-service 连接池至 300', '核对最近一次部署是否引入连接泄漏', '观察连接等待队列是否回落'],
+        citations: [
+          { dot: 'hsl(var(--agent-log))', text: 'SLS 日志：order-service-prod 10:10 起 "connection pool exhausted" 单分钟 230 条' },
+          { dot: 'hsl(var(--agent-monitor))', text: '指标：postgres-order 活跃连接 10:10 触顶 200/200' },
+        ],
+        truncated: true, totalMatched: 1247,
+      },
+      cdn: {
+        rootCause: 'CC 刷量', confidence: '90%',
+        advice: ['对 Top 攻击源 IP 段封禁（待 P3 执行）', '接入 WAF 频率限制规则', '核对大促日历排除正常突发'],
+        citations: [
+          { dot: 'hsl(var(--agent-log))', text: 'CDN 访问日志：单 IP 高频 900 req/min，UA 单一' },
+          { dot: 'hsl(var(--agent-inspector))', text: 'diagnose 风险分：82（高危）' },
+        ],
+        truncated: false, totalMatched: 0,
+      }
+    };
+
+    var input = document.getElementById('chatInput');
+    var sendBtn = document.getElementById('sendBtn');
+    var charCount = document.getElementById('charCount');
+    var emptyState = document.getElementById('emptyState');
+    var messages = document.getElementById('messages');
+
+    function updateSendState() {
+      var v = input.value;
+      charCount.textContent = v.length + '/500';
+      charCount.style.color = v.length >= 500 ? 'hsl(var(--severity-high))' : '';
+      sendBtn.disabled = v.trim().length === 0;
+    }
+    input.addEventListener('input', updateSendState);
+    updateSendState();
+
+    document.querySelectorAll('.chip').forEach(function (c) {
+      c.addEventListener('click', function () { input.value = c.dataset.q; updateSendState(); });
+    });
+
+    function userRow(text) {
+      var d = document.createElement('div');
+      d.className = 'chat-row user';
+      d.innerHTML = '<div class="who-icon">H</div><div class="bubble-wrap"><div class="bubble-head"><span class="name">havens</span></div><div class="bubble">' + text + '</div></div>';
+      messages.appendChild(d);
+    }
+
+    function agentRow(isOrder) {
+      var rep = isOrder ? mockReports.order : mockReports.cdn;
+      var trunc = rep.truncated
+        ? '<div style="margin:10px 0;"><span class="badge badge-muted" role="status">结果已截断，共 ' + rep.totalMatched + ' 条匹配，请缩小时间窗或服务范围</span></div>'
+        : '';
+
+      var citations = rep.citations.map(function (c) {
+        return '<div class="evidence-card"><div class="evidence-card-header"><span class="dot" style="background:' + c.dot + ';"></span>' + c.text + '</div></div>';
+      }).join('');
+
+      var d = document.createElement('div');
+      d.className = 'chat-row agent';
+      d.innerHTML =
+        '<div class="who-icon">🎯</div>' +
+        '<div class="bubble-wrap">' +
+          '<div class="bubble-head"><span class="name">Haven 运维 Agent</span><span class="agent-chip 编排">编排</span></div>' +
+          '<div class="card" style="padding:16px;">' +
+            '<h3 style="font-size:14px; margin-bottom:6px;">诊断结论：' + rep.rootCause + '（置信度 ' + rep.confidence + '）</h3>' +
+            '<div style="font-size:13px; margin-bottom:10px;"><strong>处置建议</strong><ul style="margin:6px 0 0 18px;">' + rep.advice.map(function (a) { return '<li>' + a + '</li>'; }).join('') + '</ul></div>' +
+            trunc +
+            '<div class="collapsible-header"><span>数据源引用（' + rep.citations.length + '）</span><span class="chevron">▾</span></div>' +
+            '<div class="collapsible-content">' + citations + '</div>' +
+            '<div style="margin-top:12px; text-align:right;"><button class="btn btn-sm btn-outline" onclick="location.href=\'diagnosis-detail.html\'">查看详情 →</button></div>' +
+          '</div>' +
+        '</div>';
+      messages.appendChild(d);
+      setupCollapsibles(d);
+      return d;
+    }
+
+    function thinkingRow(steps, cb) {
+      var d = document.createElement('div');
+      d.className = 'chat-row agent';
+      d.innerHTML =
+        '<div class="who-icon">🤖</div>' +
+        '<div class="bubble-wrap">' +
+          '<div class="bubble-head"><span class="name">Haven 运维 Agent</span><span class="agent-chip 编排">编排中</span></div>' +
+          '<details class="thinking-block" open><summary>思考过程 · 多工具编排</summary><div class="steps"></div></details>' +
+        '</div>';
+      d.querySelector('.steps').innerHTML = steps.map(function (s) {
+        return '<div class="progress-step"><span class="progress-step-dot"></span><span style="font-size:13px;">' + s + '</span></div>';
+      }).join('');
+      messages.appendChild(d);
+      return d;
+    }
+
+    var stageSteps = [
+      '① 意图识别中…',
+      '② 查询日志 / 资产 / 告警中…',
+      '③ 诊断计算中…',
+      '④ 生成报告中…',
+    ];
+
+    sendBtn.addEventListener('click', function () {
+      var q = input.value.trim();
+      if (!q) return;
+      emptyState.style.display = 'none';
+      input.value = ''; updateSendState();
+      userRow(q);
+
+      var isOrder = /order|错误率|服务/.test(q);
+      var tr = thinkingRow(['解析意图', '查询日志/资产/告警', '诊断计算', '生成报告']);
+      tr.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+      var dots = tr.querySelectorAll('.progress-step-dot');
+      var idx = 0;
+      dots[0].classList.add('active');
+      var timer = setInterval(function () {
+        idx++;
+        if (idx >= dots.length) {
+          clearInterval(timer);
+          dots.forEach(function (x) { x.classList.remove('active'); x.classList.add('completed'); });
+          tr.remove();
+          agentRow(isOrder).scrollIntoView({ behavior: 'smooth', block: 'end' });
+        } else {
+          dots[idx - 1].classList.remove('active'); dots[idx - 1].classList.add('completed');
+          dots[idx].classList.add('active');
+        }
+      }, 700);
+    });
+  </script>
+</body>
+</html>

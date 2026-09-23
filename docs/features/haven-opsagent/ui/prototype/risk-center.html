@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>风险中心 — Haven 运维 Agent</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar"></aside>
+    <div class="main-area">
+      <header class="topbar">
+        <div class="topbar-title">风险中心</div>
+        <div class="topbar-actions">
+          <button class="btn btn-outline btn-sm" onclick="location.href='history.html?from=risk-center'">🕘 历史诊断</button>
+        </div>
+      </header>
+
+      <div class="page">
+        <!-- 统计卡 -->
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:16px; margin-bottom:20px;">
+          <div class="card stat-card"><p style="font-size:12px;color:hsl(var(--muted-foreground));">高危待确认</p><p style="font-size:28px; font-weight:700; color:hsl(var(--severity-high));">1</p></div>
+          <div class="card stat-card"><p style="font-size:12px;color:hsl(var(--muted-foreground));">今日诊断</p><p style="font-size:28px; font-weight:700;">3</p></div>
+          <div class="card stat-card"><p style="font-size:12px;color:hsl(var(--muted-foreground));">待查看</p><p style="font-size:28px; font-weight:700; color:hsl(var(--severity-low));">1</p></div>
+        </div>
+
+        <!-- 筛选条 -->
+        <div class="card" style="margin-bottom:16px;">
+          <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+            <div style="flex:0 1 160px;"><label class="field-label" for="f-tenant">租户</label><input class="input" id="f-tenant" value="jlc" disabled></div>
+            <div style="flex:1 1 220px;"><label class="field-label" for="f-range">时间范围</label><input class="input" id="f-range" placeholder="最近 24 小时"></div>
+            <div style="flex:1 1 200px;"><label class="field-label" for="f-svc">服务名</label><input class="input" id="f-svc" placeholder="如 order-service"></div>
+            <button class="btn" id="filterBtn">筛选</button>
+          </div>
+        </div>
+
+        <!-- 批量操作条 -->
+        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <label style="font-size:13px; display:flex; align-items:center; gap:6px;"><input type="checkbox" id="selectAll">全选</label>
+            <button class="btn btn-sm btn-outline" id="batchSeen" disabled>批量标记已查看</button>
+            <button class="btn btn-sm btn-outline" id="batchDone" disabled>批量标记已处理</button>
+          </div>
+          <span style="font-size:12px; color:hsl(var(--muted-foreground));" id="selCount">已选 0 条</span>
+        </div>
+
+        <!-- 列表 -->
+        <div class="card" style="padding:0; overflow:hidden;">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th style="width:40px;"><input type="checkbox" id="headCheck" aria-label="全选"></th>
+                <th>服务名</th><th>级别</th><th>风险分</th><th>时间</th><th>状态</th><th>降级</th><th>操作</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+          <div class="pagination" style="padding:14px 16px;">
+            <span style="font-size:12px;color:hsl(var(--muted-foreground));" id="totalCount">共 3 条</span>
+            <span style="flex:1;"></span>
+            <button class="page-btn">‹</button><button class="page-btn current">1</button><button class="page-btn">›</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 并发冲突 Dialog -->
+  <div class="dialog-overlay" id="conflictDialog" role="dialog" aria-modal="true" aria-label="并发冲突">
+    <div class="dialog">
+      <h3>⚠️ <span>该条目已被其他值班更新</span></h3>
+      <p style="font-size:13px; color:hsl(var(--severity-low)); margin-bottom:12px;" id="conflictText">该条目已被其他值班更新为「已处理」</p>
+      <p style="font-size:13px;color:hsl(var(--muted-foreground));">你可以覆盖提交（以后写为准），或放弃本次操作。</p>
+      <div class="dialog-actions">
+        <button class="btn btn-outline" data-action="close-dialog">放弃</button>
+        <button class="btn btn-destructive" id="overrideSubmit">覆盖提交</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    injectSidebar('risk');
+
+    var rows = [
+      { svc: 'order-service', level: 'high', levelText: '高危', score: 85, time: '09:45', state: '待查看', degrade: false, pending: true },
+      { svc: 'cdn-edge', level: 'ok', levelText: '正常', score: 12, time: '09:44', state: '已查看', degrade: false, pending: false },
+      { svc: 'payment-svc', level: 'low', levelText: '低危', score: 48, time: '09:40', state: '已处理', degrade: true, pending: false },
+    ];
+    var tbody = document.getElementById('tbody');
+    var levelCls = { high: 'badge-high', low: 'badge-low', ok: 'badge-ok' };
+
+    function render() {
+      tbody.innerHTML = rows.map(function (r, i) {
+        return '<tr class="clickable alert-row" data-i="' + i + '">' +
+          '<td><input type="checkbox" class="row-check" data-i="' + i + '" aria-label="选择 ' + r.svc + '"></td>' +
+          '<td style="font-weight:500;">' + r.svc + '</td>' +
+          '<td><span class="badge ' + levelCls[r.level] + '">' + r.levelText + '</span>' + (r.pending ? ' <span class="badge badge-ghost">待人工确认·P3</span>' : '') + '</td>' +
+          '<td><span style="font-family:monospace;">' + r.score + '</span></td>' +
+          '<td><span style="font-family:monospace; font-size:12px;">' + r.time + '</span></td>' +
+          '<td><span style="font-size:13px;">' + r.state + '</span></td>' +
+          '<td>' + (r.degrade ? '<span class="badge badge-muted tooltip-host" tabindex="0">降级<span class="tooltip">LLM 预算耗尽，返回纯规则结论</span></span>' : '—') + '</td>' +
+          '<td><div style="display:flex; gap:6px; align-items:center;">' +
+            '<button class="btn btn-sm btn-outline" data-jump="' + i + '">查看详情</button>' +
+            '<div style="display:inline-block; position:relative;">' +
+              '<button class="btn btn-sm btn-ghost" data-menu-trigger="' + i + '" aria-haspopup="true" aria-expanded="false">⋯</button>' +
+              '<div class="menu-pop" data-menu-panel="' + i + '">' +
+                '<button class="menu-item" data-seen="' + i + '">标记已查看</button>' +
+                '<button class="menu-item" data-done="' + i + '">标记已处理</button>' +
+              '</div>' +
+            '</div></div></td>' +
+        '</tr>';
+      }).join('');
+      bind();
+    }
+
+    function bind() {
+      tbody.querySelectorAll('.row-check').forEach(function (cb) { cb.addEventListener('change', updateSel); });
+      tbody.querySelectorAll('[data-jump]').forEach(function (b) { b.addEventListener('click', function () { location.href = 'diagnosis-detail.html'; }); });
+      tbody.querySelectorAll('[data-seen]').forEach(function (b) { b.addEventListener('click', function () { mark(b.dataset.seen, '已查看'); }); });
+      tbody.querySelectorAll('[data-done]').forEach(function (b) { b.addEventListener('click', function () { mark(b.dataset.done, '已处理'); }); });
+      setupMenus(tbody);
+    }
+
+    function mark(i, state) {
+      var r = rows[i];
+      if (state === '已处理' && r.state === '已处理') {
+        openDialog('conflictDialog');
+        document.getElementById('conflictText').textContent = '该条目已被其他值班更新为「已处理」';
+        return;
+      }
+      r.state = state;
+      render();
+      toast('已标记' + state + '（' + r.svc + '）', 'success');
+    }
+
+    function updateSel() {
+      var checks = tbody.querySelectorAll('.row-check:checked');
+      document.getElementById('selCount').textContent = '已选 ' + checks.length + ' 条';
+      var any = checks.length > 0;
+      document.getElementById('batchSeen').disabled = !any;
+      document.getElementById('batchDone').disabled = !any;
+    }
+    document.getElementById('selectAll').addEventListener('change', function (e) {
+      tbody.querySelectorAll('.row-check').forEach(function (cb) { cb.checked = e.target.checked; });
+      updateSel();
+    });
+    document.getElementById('headCheck').addEventListener('change', function (e) {
+      document.getElementById('selectAll').checked = e.target.checked;
+      tbody.querySelectorAll('.row-check').forEach(function (c) { c.checked = e.target.checked; });
+      updateSel();
+    });
+
+    function batch(state) {
+      var checks = tbody.querySelectorAll('.row-check:checked');
+      if (checks.length === 0) return;
+      checks.forEach(function (cb) { rows[cb.dataset.i].state = state; });
+      render();
+      toast('批量标记' + state + ' 成功（' + checks.length + ' 条）', 'success');
+    }
+    document.getElementById('batchSeen').addEventListener('click', function () { batch('已查看'); });
+    document.getElementById('batchDone').addEventListener('click', function () { batch('已处理'); });
+
+    document.getElementById('overrideSubmit').addEventListener('click', function () {
+      closeDialog('conflictDialog');
+      rows[2].state = '已处理';
+      render(); toast('已覆盖提交', 'success');
+    });
+    document.getElementById('filterBtn').addEventListener('click', function () { toast('已按条件筛选（原型演示）', 'success'); });
+
+    render();
+  </script>
+</body>
+</html>
