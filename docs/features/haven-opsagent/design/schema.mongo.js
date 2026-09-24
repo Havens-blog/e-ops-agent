@@ -29,7 +29,9 @@ db.createCollection("settings");
 db.createCollection("compensations");
 
 // ============================================================
-// 索引（多租户隔离硬约束：所有索引以 tenant_id 为前缀）
+// 索引（多租户隔离硬约束：所有租户域集合的索引以 tenant_id 为前缀）
+// 说明: compensations 为系统级补偿队列（无 tenant_id 字段，唯一属主 internal/worker），
+//       其重试扫描索引按队列谓词 (status, next_retry_at) 建立而非租户前缀。
 // ============================================================
 
 db.sessions.createIndex({ tenant_id: 1, created_at: -1 }, { name: "idx_sessions_tenant_time" });
@@ -76,3 +78,5 @@ db.settings.createIndex({ scope: 1, tenant_id: 1 }, { name: "idx_settings_scope_
 //         （new=窗口首条建文档 count=1；merged=同指纹归并 $inc count；overflow_dropped=队列溢出丢弃留档）
 // settings: scope ∈ {datasource, llm, notify, risk_whitelist, preset_queries, guided_templates}
 // llm_usage: calls ≥ 0; budget_exceeded boolean
+//   （预算约束: 滚动 1h 窗口 per-tenant 计数，budget_per_hour 耗尽（budget_exceeded=true）
+//     即触发 LLM 不可用谓词 → 三级降级；calls 仅 $inc 递增，不回退）
