@@ -1,0 +1,18 @@
+{
+  "token_prefix": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ",
+  "token_suffix": "UZMChZ_PBA",
+  "decoded_claims": {
+    "data": {
+      "Uid": 1,
+      "SSID": "517ed71a-d25c-4534-b0d6-32afd677c3bf",
+      "Data": {
+        "is_admin": "true",
+        "tenant_id": "1",
+        "username": "admin"
+      },
+      "Expiration": 1792811294803
+    },
+    "exp": 1792811294,
+    "iat": 1790219294
+  }
+}

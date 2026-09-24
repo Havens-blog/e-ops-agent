@@ -1,0 +1,12 @@
+{
+  "jsonrpc": "2.0",
+  "id": 20,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"by_type\": {\n    \"cdn\": 598,\n    \"disk\": 3415,\n    \"ecs\": 1932,\n    \"eip\": 311,\n    \"elasticsearch\": 35,\n    \"image\": 669,\n    \"kafka\": 21,\n    \"lb\": 320,\n    \"mongodb\": 37,\n    \"nas\": 95,\n    \"oss\": 883,\n    \"rds\": 48,\n    \"redis\": 199,\n    \"security_group\": 910,\n    \"snapshot\": 3620,\n    \"vpc\": 96,\n    \"vswitch\": 860,\n    \"waf\": 424\n  },\n  \"tenant_id\": 3,\n  \"total_count\": 14473\n}"
+      }
+    ]
+  }
+}

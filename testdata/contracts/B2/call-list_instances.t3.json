@@ -1,0 +1,12 @@
+{
+  "jsonrpc": "2.0",
+  "id": 22,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"asset_type\": \"ecs\",\n  \"items\": [\n    {\n      \"account_id\": 1,\n      \"asset_id\": \"i-wz9adpn823e2s9lte4sb\",\n      \"asset_name\": \"worker-k8s-for-cs-c63a12de8d7844dc3a65a553718a37deb\",\n      \"id\": 93076264,\n      \"model_uid\": \"aliyun_ecs\",\n      \"private_ip\": \"172.22.35.203\",\n      \"provider\": \"aliyun\",\n      \"region\": \"cn-shenzhen\",\n      \"status\": \"running\"\n    },\n    {\n      \"account_id\": 1,\n      \"asset_id\": \"i-wz97a4ek6qb1tt9bk7mv\",\n      \"asset_name\": \"worker-k8s-for-cs-c63a12de8d7844dc3a65a553718a37deb\",\n      \"id\": 93076263,\n      \"model_uid\": \"aliyun_ecs\",\n      \"private_ip\": \"172.22.14.243\",\n      \"provider\": \"aliyun\",\n      \"region\": \"cn-shenzhen\",\n      \"status\": \"running\"\n    }\n  ],\n  \"total\": 1932\n}"
+      }
+    ]
+  }
+}

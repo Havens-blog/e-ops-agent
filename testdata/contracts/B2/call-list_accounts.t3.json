@@ -1,0 +1,12 @@
+{
+  "jsonrpc": "2.0",
+  "id": 21,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"accounts\": [\n    {\n      \"id\": 5,\n      \"name\": \"集团-火山云\",\n      \"provider\": \"volcengine\",\n      \"environment\": \"production\",\n      \"status\": \"active\",\n      \"regions\": [\n        \"cn-guangzhou\"\n      ],\n      \"asset_count\": 6611,\n      \"last_sync_time\": \"2026-09-24 02:58:38\"\n    },\n    {\n      \"id\": 4,\n      \"name\": \"集团-腾讯云\",\n      \"provider\": \"tencent\",\n      \"environment\": \"production\",\n      \"status\": \"active\",\n      \"regions\": [\n        \"ap-guangzhou\"\n      ],\n      \"asset_count\": 7723,\n      \"last_sync_time\": \"2026-09-24 02:16:38\"\n    },\n    {\n      \"id\": 3,\n      \"name\": \"集团-AWS\",\n      \"provider\": \"aws\",\n      \"environment\": \"production\",\n      \"status\": \"active\",\n      \"regions\": [\n        \"eu-west-1\"\n      ],\n      \"asset_count\": 3108,\n      \"last_sync_time\": \"2026-09-24 01:13:43\"\n    },\n    {\n      \"id\": 2,\n      \"name\": \"集团-华为云\",\n      \"provider\": \"huawei\",\n      \"environment\": \"production\",\n      \"status\": \"active\",\n      \"regions\": [\n        \"cn-south-1\"\n      ],\n      \"asset_count\": 1711,\n      \"last_sync_time\": \"2026-09-24 02:55:16\"\n    },\n    {\n      \"id\": 1,\n      \"name\": \"集团-阿里云\",\n      \"provider\": \"aliyun\",\n      \"environment\": \"production\",\n      \"status\": \"active\",\n      \"regions\": [\n        \"cn-shenzhen\",\n        \"cn-wulanchabu\",\n        \"cn-guangzhou\",\n        \"eu-central-1\",\n        \"ap-southeast-1\"\n      ],\n      \"asset_count\": 20395,\n      \"last_sync_time\": \"2026-09-24 01:36:01\"\n    }\n  ],\n  \"total\": 5\n}"
+      }
+    ]
+  }
+}

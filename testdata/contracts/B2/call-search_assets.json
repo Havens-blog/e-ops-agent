@@ -1,0 +1,12 @@
+{
+  "jsonrpc": "2.0",
+  "id": 13,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"items\": [],\n  \"keyword\": \"test\",\n  \"total\": 0\n}"
+      }
+    ]
+  }
+}

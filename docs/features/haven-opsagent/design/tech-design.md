@@ -284,7 +284,8 @@ type IntentCandidate struct {
 }
 
 // ---- 底座契约（Interface 2）----
-// LogEntry 联邦日志条目（契约 B1 最小稳定子集；精确字段名 M1 冻结）
+// LogEntry 联邦日志条目（契约 B1 最小稳定子集；精确字段名已于 M1 冻结，见 contracts/README.md › B1 ——
+// 底座 /search entries 为 CDN/WAF/SLB 多态条目，共享 meta{cloud,account_id,account_name,region,resource_id,source} + timestamp）
 type LogEntry struct {
     Timestamp time.Time      `json:"timestamp"`
     Cloud     string         `json:"cloud"`     // aliyun|huawei|aws|tencent
@@ -599,9 +600,11 @@ type RiskWhitelistEntry struct {
 
 ## Open Questions
 
-- [ ] eiam 具体验证端点与 token 载荷字段（OIDC introspection vs 内部验证接口）——契约冻结阶段（M1）盘点确认。
-- [ ] 底座各模块精确 HTTP 路由路径与响应字段名——契约文档阶段（M1）以实际盘点冻结，本设计只约束契约「形状」。
-- [ ] 通知渠道复用方式：走 alert 模块的通知发送接口，还是 opsagent 直连渠道 webhook——M1 契约盘点时择一冻结。
+> 三项均已于 M1 契约冻结收口（2026-09-24），结论与依据见 [contracts/README.md](../../../contracts/README.md)。
+
+- [x] eiam 具体验证端点与 token 载荷字段（OIDC introspection vs 内部验证接口）——**已冻结：共享密钥 JWT + 共享 Redis 会话本地校验**（非 introspection）；claims 字段 `Uid / Data.tenant_id(string) / Data.is_admin / Expiration(ms)`，见契约 B3。
+- [x] 底座各模块精确 HTTP 路由路径与响应字段名——**已冻结**（契约 B1 六端点 / B2 十工具 / B3 三端点，golden 快照 `testdata/contracts/B1..B4/*.json` 实测入库），见契约 B1/B2/B3。
+- [x] 通知渠道复用方式：走 alert 模块的通知发送接口，还是 opsagent 直连渠道 webhook——**已冻结：opsagent 直连渠道 webhook**（alert 无承载任意载荷的 HTTP 发送端点，发送能力为进程内 Go 接口），见契约 B4。
 
 ## Appendix
 

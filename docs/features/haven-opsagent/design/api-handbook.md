@@ -293,33 +293,37 @@ related: design/tech-design.md
 
 ---
 
-## Part B — 底座接口契约（冻结对象，M1 盘点定稿）
+## Part B — 底座接口契约（已于 M1 冻结）
 
-> 以下为契约「形状」，**精确路径/字段名在 M1 契约盘点时以实际 e-cam-service 导出为准冻结**，此处约束调用语义。契约测试 fixtures（golden JSON 快照 `testdata/contracts/B1..B4/*.json`）于 M1 冻结时从**测试环境 e-cam-service 实测响应**捕获；CI 优先对 live 测试环境 e-cam-service 重放断言，服务不可用时回退 golden fixtures（标记 skipped 并告警）。
+> **契约已于 M1 冻结定稿**：精确路径 / 字段名 / 错误语义 / 超时降级 / 租户字段以 [contracts/README.md](../../../contracts/README.md)（v1.0.0，2026-09-24）为**唯一权威版本**，golden JSON 快照（从测试环境 e-cam-service 实测响应捕获）见 `testdata/contracts/B1..B4/*.json`。本节保留契约「形状」摘要与调用语义约束；冲突时以契约文档为准。CI 优先对 live 测试环境 e-cam-service 重放断言，服务不可用时回退 golden fixtures（标记 skipped 并告警）。
 
-### 契约 B1：logquery 日志查询 + diagnose 风险分
+### 契约 B1：logquery 日志查询 + diagnose 风险分（v1.0.0）
 
-**Method**: `POST` · **Path**: `{M1 冻结}` · **Auth**: 服务间
+**Method**: `POST` · **Path**: `/api/v1/cam/logs/search`（诊断风险分：`POST /api/v1/cam/logs/diagnose`，仅 waf）· **Auth**: eiam 会话令牌
 
-- 请求：日志类型 × 云 × 账号 × 资源 × 时间范围（`LogQueryRequest`）
-- 响应：联邦结果 + `truncated` + diagnose `riskScore`
-- 语义：空结果 → `total=0`（编排层明示「无匹配日志」）；超时 → 降级空证据
+- 请求：`log_type`(cdn|waf|slb) × `start_time`/`end_time`(Unix ms) × clouds × account_ids × resources × filters × limit（每源默认 100 / 硬顶 2000）
+- 响应：联邦结果（`entries` 多态 CDN/WAF/SLB 条目 + `sources[].error` 失败不静默）+ `truncated` + diagnose `result.risk_score`(0–100)/`risk_level`
+- 语义：空结果 → `total=0`（编排层明示「无匹配日志」）；联邦超时(30s) → 返回已完成部分 + `truncated=true`（编排侧另有 8s 预算超时 → 降级空证据）
 
-### 契约 B2：资产查询（MCP Tools）
+### 契约 B2：资产查询（MCP Tools，stdio）（v1.0.0）
 
-- 工具清单（MCP）：`query_ecs` / `query_rds` / `query_redis` / …
-- 入参 schema 稳定；返回结构**必含 `tenant` 字段**
+- 工具清单（MCP，实测 10 个）：`list_accounts` / `get_account` / `test_account_connection` / `list_instances` / `get_instance` / `search_assets` / `get_asset_statistics` / `sync_assets` / `list_regions` / `realtime_list_ecs`——**无 `query_ecs` 等独立工具**，资产类型为 `asset_type` 参数（ecs/rds/redis/… 18 值域）
+- 入参 schema 稳定；`tenant_id` 为必填入参（opsagent 恒传会话派生租户）；返回侧 `get_instance` / `get_asset_statistics` 含 `tenant_id`，list/search 条目暂无（冻结注记：如需 per-record tenant 以新增可选字段交付）
+- 错误：`CallToolResult.isError=true`（text=`"错误: <err>"`）；无 per-call 超时——opsagent 自持 5s 预算
+- 已知缺陷（冻结实测）：底座 `ServeStdio` 以 nil stdin 调用 `Listen`，联调前须底座一行修复（contracts/README.md › B2）
 
-### 契约 B3：eiam 鉴权
+### 契约 B3：eiam 鉴权（v1.0.0）
 
-- `verifyToken(token) → { userId, tenant, roles }`
-- 租户谓词语义：所有数据访问强制注入 `tenant`
+- 机制（Open Question 收口）：**共享密钥 JWT + 共享 Redis 会话本地校验**（ginx session，非 OIDC introspection、无 HTTP 验证端点）；签发端点 `POST /api/user/system/login`（/`ldap/login`）+ `POST /api/tenant/switch`；令牌 Cookie `ecmdb-token-key` / Authorization 头双载体，TTL 30 天
+- `verifyToken(token) → { userId, tenant, roles }`：映射实测 claims `Uid` / `Data.tenant_id`(**string**) / `Data.is_admin`("true"\|缺省) + `Data.authorized_codes`
+- 错误语义：凭据无效/过期 → 401「会话无效或已过期」；`tenant_id=0` → 403「当前会话未选定租户空间」（401/403 分界冻结）
+- 租户谓词语义：所有数据访问强制注入 claims 派生 `tenant_id`；请求自报租户（`X-Tenant-ID` 头/查询参数）已废弃不采纳
 
-### 契约 B4：通知渠道发送
+### 契约 B4：通知渠道发送（v1.0.0，复用方式已择一冻结）
 
-- 渠道：钉钉 / 飞书 / 企微 / 邮件
-- 请求：渠道 + 告警摘要 + 诊断入口链接（**不携带跨租户数据**）
-- 响应：发送结果 `NotifyResult`（用于 SC-2 通知成功率埋点）
+- **冻结决策：opsagent 直连渠道 webhook**（不走 alert 通知接口）——实测依据：alert 模块无承载任意通知载荷的 HTTP 发送端点（仅渠道 CRUD + 固定文案 test），`channel.Sender`/`EmitEvent` 均为进程内 Go 接口，跨服务不可调用
+- 渠道：钉钉 / 飞书 / 企微 / 邮件；载荷语义与 alert `channel.Message` 同构（title/content/severity/markdown）；请求：渠道 + 告警摘要 + 诊断入口链接（**不携带跨租户数据**）
+- 响应：`NotifyResult{channel, ok, attempts(≤3), lastError, sentAt}`（10s 单次发送超时，重试计入 SC-2 成功率埋点，失败不阻断落库）
 
 ---
 

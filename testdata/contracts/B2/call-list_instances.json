@@ -1,0 +1,12 @@
+{
+  "jsonrpc": "2.0",
+  "id": 12,
+  "result": {
+    "content": [
+      {
+        "type": "text",
+        "text": "{\n  \"asset_type\": \"ecs\",\n  \"items\": [],\n  \"total\": 0\n}"
+      }
+    ]
+  }
+}
