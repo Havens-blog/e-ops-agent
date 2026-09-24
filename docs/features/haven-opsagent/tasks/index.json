@@ -10,7 +10,7 @@
       "title": "opsagent 服务骨架与模块装配",
       "priority": "P0",
       "estimatedTime": "4h",
-      "status": "pending",
+      "status": "completed",
       "file": "1.1-project-skeleton.md",
       "record": "records/1.1-project-skeleton.md",
       "type": "coding.feature",
