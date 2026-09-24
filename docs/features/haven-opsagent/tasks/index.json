@@ -1,0 +1,733 @@
+{
+  "feature": "haven-opsagent",
+  "prd": "prd/prd-spec.md",
+  "design": "design/tech-design.md",
+  "proposal": "docs/proposals/haven-opsagent/proposal.md",
+  "created": "2026-09-24",
+  "tasks": {
+    "1.1-project-skeleton": {
+      "id": "1.1",
+      "title": "opsagent 服务骨架与模块装配",
+      "priority": "P0",
+      "estimatedTime": "4h",
+      "status": "pending",
+      "file": "1.1-project-skeleton.md",
+      "record": "records/1.1-project-skeleton.md",
+      "type": "coding.feature",
+      "complexity": "medium"
+    },
+    "1.2-domain-types": {
+      "id": "1.2",
+      "title": "领域类型与共享枚举/结构",
+      "priority": "P0",
+      "estimatedTime": "4h",
+      "dependencies": [
+        "1.1"
+      ],
+      "status": "pending",
+      "file": "1.2-domain-types.md",
+      "record": "records/1.2-domain-types.md",
+      "type": "coding.feature",
+      "complexity": "medium"
+    },
+    "1.3-mongo-schema": {
+      "id": "1.3",
+      "title": "Mongo 集合与索引脚本落地",
+      "priority": "P0",
+      "estimatedTime": "2h",
+      "dependencies": [
+        "1.2"
+      ],
+      "status": "pending",
+      "file": "1.3-mongo-schema.md",
+      "record": "records/1.3-mongo-schema.md",
+      "type": "doc"
+    },
+    "1.4-contract-freeze": {
+      "id": "1.4",
+      "title": "底座接口契约冻结与 golden 快照",
+      "priority": "P0",
+      "estimatedTime": "4h",
+      "dependencies": [
+        "1.2"
+      ],
+      "status": "pending",
+      "file": "1.4-contract-freeze.md",
+      "record": "records/1.4-contract-freeze.md",
+      "type": "doc"
+    },
+    "1.gate": {
+      "id": "1.gate",
+      "title": "Phase 1 Gate",
+      "priority": "P0",
+      "estimatedTime": "1h",
+      "dependencies": [
+        "1.summary"
+      ],
+      "status": "pending",
+      "file": "1.gate.md",
+      "record": "records/1.gate.md",
+      "breaking": true,
+      "type": "gate"
+    },
+    "1.summary": {
+      "id": "1.summary",
+      "title": "Phase 1 Summary",
+      "priority": "P0",
+      "estimatedTime": "15min",
+      "dependencies": [
+        "1.1",
+        "1.2",
+        "1.3",
+        "1.4"
+      ],
+      "status": "pending",
+      "file": "1.summary.md",
+      "record": "records/1.summary.md",
+      "type": "doc.summary"
+    },
+    "2.1-repo-diagnosis": {
+      "id": "2.1",
+      "title": "repository/dao 会话与诊断写入",
+      "priority": "P0",
+      "estimatedTime": "4h",
+      "dependencies": [
+        "1.gate"
+      ],
+      "status": "pending",
+      "file": "2.1-repo-diagnosis.md",
+      "record": "records/2.1-repo-diagnosis.md",
+      "type": "coding.feature",
+      "complexity": "medium"
+    },
+    "2.2-repo-risk-entries": {
+      "id": "2.2",
+      "title": "repository/dao 风险中心条目 CAS 状态机",
+      "priority": "P0",
+      "estimatedTime": "4h",
+      "dependencies": [
+        "1.gate"
+      ],
+      "status": "pending",
+      "file": "2.2-repo-risk-entries.md",
+      "record": "records/2.2-repo-risk-entries.md",
+      "type": "coding.feature",
+      "complexity": "high"
+    },
+    "2.3-repo-alerts-config": {
+      "id": "2.3",
+      "title": "repository/dao 告警记账/预算/配置/补偿",
+      "priority": "P0",
+      "estimatedTime": "4h",
+      "dependencies": [
+        "1.gate"
+      ],
+      "status": "pending",
+      "file": "2.3-repo-alerts-config.md",
+      "record": "records/2.3-repo-alerts-config.md",
+      "type": "coding.feature",
+      "complexity": "medium"
+    },
+    "2.4-llm-provider": {
+      "id": "2.4",
+      "title": "LLM Provider 抽象 + GuardedLLM 降级封装",
+      "priority": "P0",
+      "estimatedTime": "4h",
+      "dependencies": [
+        "1.gate"
+      ],
+      "status": "pending",
+      "file": "2.4-llm-provider.md",
+      "record": "records/2.4-llm-provider.md",
+      "type": "coding.feature",
+      "complexity": "medium"
+    },
+    "2.5-risk-registry": {
+      "id": "2.5",
+      "title": "RiskRegistry 风险分级确定性代码",
+      "priority": "P1",
+      "estimatedTime": "3h",
+      "dependencies": [
+        "1.gate"
+      ],
+      "status": "pending",
+      "file": "2.5-risk-registry.md",
+      "record": "records/2.5-risk-registry.md",
+      "type": "coding.feature",
+      "complexity": "medium"
+    },
+    "2.6-baseclient": {
+      "id": "2.6",
+      "title": "BaseModuleClient 底座契约客户端",
+      "priority": "P0",
+      "estimatedTime": "4h",
+      "dependencies": [
+        "1.gate"
+      ],
+      "status": "pending",
+      "file": "2.6-baseclient.md",
+      "record": "records/2.6-baseclient.md",
+      "type": "coding.feature",
+      "complexity": "medium"
+    },
+    "2.gate": {
+      "id": "2.gate",
+      "title": "Phase 2 Gate",
+      "priority": "P0",
+      "estimatedTime": "1h",
+      "dependencies": [
+        "2.summary"
+      ],
+      "status": "pending",
+      "file": "2.gate.md",
+      "record": "records/2.gate.md",
+      "breaking": true,
+      "type": "gate"
+    },
+    "2.summary": {
+      "id": "2.summary",
+      "title": "Phase 2 Summary",
+      "priority": "P0",
+      "estimatedTime": "15min",
+      "dependencies": [
+        "2.1",
+        "2.2",
+        "2.3",
+        "2.4",
+        "2.5",
+        "2.6"
+      ],
+      "status": "pending",
+      "file": "2.summary.md",
+      "record": "records/2.summary.md",
+      "type": "doc.summary"
+    },
+    "3.1-intent-classifier": {
+      "id": "3.1",
+      "title": "IntentClassifier 意图识别与能力路由",
+      "priority": "P0",
+      "estimatedTime": "4h",
+      "dependencies": [
+        "2.gate"
+      ],
+      "status": "pending",
+      "file": "3.1-intent-classifier.md",
+      "record": "records/3.1-intent-classifier.md",
+      "type": "coding.feature",
+      "complexity": "high"
+    },
+    "3.2-orchestrator": {
+      "id": "3.2",
+      "title": "编排流水线 Orchestrator + 4 逻辑 Agent 角色",
+      "priority": "P0",
+      "estimatedTime": "6h",
+      "dependencies": [
+        "2.gate",
+        "3.1"
+      ],
+      "status": "pending",
+      "file": "3.2-orchestrator.md",
+      "record": "records/3.2-orchestrator.md",
+      "type": "coding.feature",
+      "complexity": "high"
+    },
+    "3.3-degradation-controller": {
+      "id": "3.3",
+      "title": "DegradationController 三级降级",
+      "priority": "P1",
+      "estimatedTime": "4h",
+      "dependencies": [
+        "2.gate",
+        "3.1"
+      ],
+      "status": "pending",
+      "file": "3.3-degradation-controller.md",
+      "record": "records/3.3-degradation-controller.md",
+      "type": "coding.feature",
+      "complexity": "high"
+    },
+    "3.4-llm-safety": {
+      "id": "3.4",
+      "title": "LLM 输入输出侧安全（清洗/包裹/围栏/引用校验）",
+      "priority": "P0",
+      "estimatedTime": "4h",
+      "dependencies": [
+        "2.gate"
+      ],
+      "status": "pending",
+      "file": "3.4-llm-safety.md",
+      "record": "records/3.4-llm-safety.md",
+      "type": "coding.feature",
+      "complexity": "high"
+    },
+    "3.5-notify": {
+      "id": "3.5",
+      "title": "notify 通知渠道发送 + 重试 + 失败率埋点",
+      "priority": "P1",
+      "estimatedTime": "3h",
+      "dependencies": [
+        "2.gate"
+      ],
+      "status": "pending",
+      "file": "3.5-notify.md",
+      "record": "records/3.5-notify.md",
+      "type": "coding.feature",
+      "complexity": "medium"
+    },
+    "3.gate": {
+      "id": "3.gate",
+      "title": "Phase 3 Gate",
+      "priority": "P0",
+      "estimatedTime": "1h",
+      "dependencies": [
+        "3.summary"
+      ],
+      "status": "pending",
+      "file": "3.gate.md",
+      "record": "records/3.gate.md",
+      "breaking": true,
+      "type": "gate"
+    },
+    "3.summary": {
+      "id": "3.summary",
+      "title": "Phase 3 Summary",
+      "priority": "P0",
+      "estimatedTime": "15min",
+      "dependencies": [
+        "3.1",
+        "3.2",
+        "3.3",
+        "3.4",
+        "3.5"
+      ],
+      "status": "pending",
+      "file": "3.summary.md",
+      "record": "records/3.summary.md",
+      "type": "doc.summary"
+    },
+    "4.1-alert-worker": {
+      "id": "4.1",
+      "title": "告警 worker（指纹去重/并发/队列/LLM 预算）",
+      "priority": "P0",
+      "estimatedTime": "5h",
+      "dependencies": [
+        "3.gate"
+      ],
+      "status": "pending",
+      "file": "4.1-alert-worker.md",
+      "record": "records/4.1-alert-worker.md",
+      "type": "coding.feature",
+      "complexity": "high"
+    },
+    "4.2-compensation-worker": {
+      "id": "4.2",
+      "title": "补偿重试循环（compensations worker）",
+      "priority": "P1",
+      "estimatedTime": "3h",
+      "dependencies": [
+        "3.gate"
+      ],
+      "status": "pending",
+      "file": "4.2-compensation-worker.md",
+      "record": "records/4.2-compensation-worker.md",
+      "type": "coding.feature",
+      "complexity": "medium"
+    },
+    "4.3-middleware": {
+      "id": "4.3",
+      "title": "web 中间件 + 租户强制注入 + 错误映射",
+      "priority": "P0",
+      "estimatedTime": "4h",
+      "dependencies": [
+        "3.gate"
+      ],
+      "status": "pending",
+      "file": "4.3-middleware.md",
+      "record": "records/4.3-middleware.md",
+      "type": "coding.feature",
+      "complexity": "medium"
+    },
+    "4.4-web-chat": {
+      "id": "4.4",
+      "title": "web 对话排障 handler（chat + correct）",
+      "priority": "P0",
+      "estimatedTime": "4h",
+      "dependencies": [
+        "3.gate",
+        "4.3"
+      ],
+      "status": "pending",
+      "file": "4.4-web-chat.md",
+      "record": "records/4.4-web-chat.md",
+      "type": "coding.feature",
+      "complexity": "high"
+    },
+    "4.5-web-risk-center": {
+      "id": "4.5",
+      "title": "web 风险中心 handler（list + 单/批量 CAS + stats）",
+      "priority": "P0",
+      "estimatedTime": "4h",
+      "dependencies": [
+        "3.gate",
+        "4.3"
+      ],
+      "status": "pending",
+      "file": "4.5-web-risk-center.md",
+      "record": "records/4.5-web-risk-center.md",
+      "type": "coding.feature",
+      "complexity": "high"
+    },
+    "4.6-web-diagnosis-history": {
+      "id": "4.6",
+      "title": "web 诊断详情 + 历史回溯 handler",
+      "priority": "P1",
+      "estimatedTime": "4h",
+      "dependencies": [
+        "3.gate",
+        "4.3"
+      ],
+      "status": "pending",
+      "file": "4.6-web-diagnosis-history.md",
+      "record": "records/4.6-web-diagnosis-history.md",
+      "type": "coding.feature",
+      "complexity": "medium"
+    },
+    "4.7-web-settings-agents": {
+      "id": "4.7",
+      "title": "web 系统配置 + Agent 管理 handler",
+      "priority": "P1",
+      "estimatedTime": "3h",
+      "dependencies": [
+        "3.gate",
+        "4.3"
+      ],
+      "status": "pending",
+      "file": "4.7-web-settings-agents.md",
+      "record": "records/4.7-web-settings-agents.md",
+      "type": "coding.feature",
+      "complexity": "medium"
+    },
+    "4.8-alert-webhook": {
+      "id": "4.8",
+      "title": "alerts webhook handler（入站 + 幂等 + 溢出语义）",
+      "priority": "P0",
+      "estimatedTime": "3h",
+      "dependencies": [
+        "3.gate",
+        "4.1",
+        "4.3"
+      ],
+      "status": "pending",
+      "file": "4.8-alert-webhook.md",
+      "record": "records/4.8-alert-webhook.md",
+      "type": "coding.feature",
+      "complexity": "medium"
+    },
+    "4.gate": {
+      "id": "4.gate",
+      "title": "Phase 4 Gate",
+      "priority": "P0",
+      "estimatedTime": "1h",
+      "dependencies": [
+        "4.summary"
+      ],
+      "status": "pending",
+      "file": "4.gate.md",
+      "record": "records/4.gate.md",
+      "breaking": true,
+      "type": "gate"
+    },
+    "4.summary": {
+      "id": "4.summary",
+      "title": "Phase 4 Summary",
+      "priority": "P0",
+      "estimatedTime": "15min",
+      "dependencies": [
+        "4.1",
+        "4.2",
+        "4.3",
+        "4.4",
+        "4.5",
+        "4.6",
+        "4.7",
+        "4.8"
+      ],
+      "status": "pending",
+      "file": "4.summary.md",
+      "record": "records/4.summary.md",
+      "type": "doc.summary"
+    },
+    "5.1-theme-routes-nav": {
+      "id": "5.1",
+      "title": "cyan 深色设计系统 + 路由 + 侧边导航集成",
+      "priority": "P0",
+      "estimatedTime": "4h",
+      "dependencies": [
+        "4.gate"
+      ],
+      "status": "pending",
+      "file": "5.1-theme-routes-nav.md",
+      "record": "records/5.1-theme-routes-nav.md",
+      "type": "coding.feature",
+      "complexity": "medium"
+    },
+    "5.2-page-chat": {
+      "id": "5.2",
+      "title": "对话排障页（ChatPanel/ThinkingBlock/EvidenceCard/IntentCorrection）",
+      "priority": "P0",
+      "estimatedTime": "5h",
+      "dependencies": [
+        "4.gate",
+        "5.1"
+      ],
+      "status": "pending",
+      "file": "5.2-page-chat.md",
+      "record": "records/5.2-page-chat.md",
+      "type": "coding.feature",
+      "complexity": "high"
+    },
+    "5.3-page-risk-center": {
+      "id": "5.3",
+      "title": "风险中心页（StatCards/FilterBar/RiskTable/StatusMark/HighRiskTag）",
+      "priority": "P0",
+      "estimatedTime": "5h",
+      "dependencies": [
+        "4.gate",
+        "5.1"
+      ],
+      "status": "pending",
+      "file": "5.3-page-risk-center.md",
+      "record": "records/5.3-page-risk-center.md",
+      "type": "coding.feature",
+      "complexity": "high"
+    },
+    "5.4-page-diagnosis": {
+      "id": "5.4",
+      "title": "诊断详情页（RootCauseCard/EvidenceList/TraceView/DispositionList）",
+      "priority": "P1",
+      "estimatedTime": "4h",
+      "dependencies": [
+        "4.gate",
+        "5.1"
+      ],
+      "status": "pending",
+      "file": "5.4-page-diagnosis.md",
+      "record": "records/5.4-page-diagnosis.md",
+      "type": "coding.feature",
+      "complexity": "medium"
+    },
+    "5.5-page-history": {
+      "id": "5.5",
+      "title": "历史回溯页（SearchBar/SessionList/SessionView）",
+      "priority": "P1",
+      "estimatedTime": "4h",
+      "dependencies": [
+        "4.gate",
+        "5.1"
+      ],
+      "status": "pending",
+      "file": "5.5-page-history.md",
+      "record": "records/5.5-page-history.md",
+      "type": "coding.feature",
+      "complexity": "medium"
+    },
+    "5.6-page-settings-agents": {
+      "id": "5.6",
+      "title": "系统配置 + Agent 管理页",
+      "priority": "P1",
+      "estimatedTime": "5h",
+      "dependencies": [
+        "4.gate",
+        "5.1"
+      ],
+      "status": "pending",
+      "file": "5.6-page-settings-agents.md",
+      "record": "records/5.6-page-settings-agents.md",
+      "type": "coding.feature",
+      "complexity": "high"
+    },
+    "5.gate": {
+      "id": "5.gate",
+      "title": "Phase 5 Gate",
+      "priority": "P0",
+      "estimatedTime": "1h",
+      "dependencies": [
+        "5.summary"
+      ],
+      "status": "pending",
+      "file": "5.gate.md",
+      "record": "records/5.gate.md",
+      "breaking": true,
+      "type": "gate"
+    },
+    "5.summary": {
+      "id": "5.summary",
+      "title": "Phase 5 Summary",
+      "priority": "P0",
+      "estimatedTime": "15min",
+      "dependencies": [
+        "5.1",
+        "5.2",
+        "5.3",
+        "5.4",
+        "5.5",
+        "5.6"
+      ],
+      "status": "pending",
+      "file": "5.summary.md",
+      "record": "records/5.summary.md",
+      "type": "doc.summary"
+    },
+    "clean-code": {
+      "id": "T-clean-code",
+      "title": "Simplify and Clean Code",
+      "priority": "P2",
+      "estimatedTime": "20min",
+      "dependencies": [
+        "5.gate"
+      ],
+      "status": "pending",
+      "file": "clean-code.md",
+      "record": "records/clean-code.md",
+      "type": "code-quality.simplify"
+    },
+    "consolidate-specs": {
+      "id": "T-specs-consolidate",
+      "title": "Consolidate Specs",
+      "priority": "P2",
+      "estimatedTime": "20min",
+      "dependencies": [
+        "5.6"
+      ],
+      "status": "pending",
+      "file": "consolidate-specs.md",
+      "record": "records/consolidate-specs.md",
+      "type": "doc.consolidate"
+    },
+    "eval-contract": {
+      "id": "T-eval-contract",
+      "title": "Evaluate Contract Quality",
+      "priority": "P1",
+      "estimatedTime": "20-30min",
+      "dependencies": [
+        "T-test-gen-contracts"
+      ],
+      "status": "pending",
+      "file": "eval-contract.md",
+      "record": "records/eval-contract.md",
+      "mainSession": true,
+      "type": "eval.contract"
+    },
+    "eval-journey": {
+      "id": "T-eval-journey",
+      "title": "Evaluate Journey Quality",
+      "priority": "P1",
+      "estimatedTime": "20-30min",
+      "dependencies": [
+        "T-test-gen-journeys"
+      ],
+      "status": "pending",
+      "file": "eval-journey.md",
+      "record": "records/eval-journey.md",
+      "mainSession": true,
+      "type": "eval.journey"
+    },
+    "gen-contracts": {
+      "id": "T-test-gen-contracts",
+      "title": "Generate Test Contracts",
+      "priority": "P1",
+      "estimatedTime": "30-45min",
+      "dependencies": [
+        "T-eval-journey"
+      ],
+      "status": "pending",
+      "file": "gen-contracts.md",
+      "record": "records/gen-contracts.md",
+      "type": "test.gen-contracts"
+    },
+    "gen-journeys": {
+      "id": "T-test-gen-journeys",
+      "title": "Generate Test Journeys",
+      "priority": "P1",
+      "estimatedTime": "20-30min",
+      "dependencies": [
+        "T-review-doc",
+        "T-clean-code",
+        "1.1",
+        "4.5",
+        "5.3",
+        "2.6",
+        "3.3",
+        "3.4",
+        "1.3",
+        "1.4",
+        "2.1",
+        "3.1",
+        "2.3",
+        "2.4",
+        "3.2",
+        "4.3",
+        "4.7",
+        "4.8",
+        "2.5",
+        "3.5",
+        "4.1",
+        "4.4",
+        "5.1",
+        "5.2",
+        "5.4",
+        "1.2",
+        "4.6",
+        "4.2",
+        "5.5",
+        "2.2",
+        "5.6"
+      ],
+      "status": "pending",
+      "file": "gen-journeys.md",
+      "record": "records/gen-journeys.md",
+      "type": "test.gen-journeys"
+    },
+    "review-doc": {
+      "id": "T-review-doc",
+      "title": "Review Documentation Quality",
+      "priority": "P1",
+      "estimatedTime": "30min",
+      "dependencies": [
+        "1.3",
+        "1.4"
+      ],
+      "status": "pending",
+      "file": "review-doc.md",
+      "record": "records/review-doc.md",
+      "type": "doc.review"
+    },
+    "validate-code": {
+      "id": "T-validate-code",
+      "title": "Validate Code Quality",
+      "priority": "P2",
+      "estimatedTime": "15min",
+      "dependencies": [
+        "5.6"
+      ],
+      "status": "pending",
+      "file": "validate-code.md",
+      "record": "records/validate-code.md",
+      "type": "validation.code"
+    }
+  },
+  "statusEnum": [
+    "pending",
+    "in_progress",
+    "completed",
+    "blocked",
+    "suspended",
+    "skipped",
+    "rejected"
+  ],
+  "priorityEnum": [
+    "P0",
+    "P1",
+    "P2"
+  ]
+}
