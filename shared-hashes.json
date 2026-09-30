@@ -1,0 +1,29 @@
+{
+  "sourceRepo": "e-cam-web",
+  "sourceRepoRoot": "../e-cam-web",
+  "copiedAt": "2026-09-30",
+  "note": "拷贝面漂移防线数据源（tech-design Architecture「拷贝面漂移防线」）：逐条登记拷贝文件 × sha256 × 源仓 commit。CI job 重算 e-cam-web 源文件 sha256 比对由任务 2.11 承接；e-cam-web 侧改动主题/请求层文件 → CI 当日变红 → 人工评估差异 → 同步拷贝 + 更新 hash + 主题冒烟回归。",
+  "files": [
+    {
+      "path": "src/assets/styles/theme-variables.scss",
+      "sourcePath": "src/assets/styles/theme-variables.scss",
+      "sourceCommit": "d28829e0d119666ae0ca9c4d4129e9d29e83dc0e",
+      "sourceCommitDate": "2026-09-20",
+      "sha256": "248c4f993dfe01e8142a7aef4125261de5115e16a33e8b04799aae5b936b35c3"
+    },
+    {
+      "path": "src/assets/styles/element-theme.scss",
+      "sourcePath": "src/assets/styles/element-theme.scss",
+      "sourceCommit": "08904e9d0a21f4239f06f6e46e00388835155f2e",
+      "sourceCommitDate": "2026-09-21",
+      "sha256": "dcac0148759c1b0d4985ac455dc13d1cc3909f92e217e8f68cbb90caf202f762"
+    }
+  ],
+  "pending": [
+    {
+      "path": "src/api/request/eiam.ts",
+      "sourcePath": "src/api/request/eiam.ts",
+      "reason": "eiamAxios 模式文件尚未落地（任务 2.4）；落地时随本清单一并登记 sha256 × 源 commit"
+    }
+  ]
+}

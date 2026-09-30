@@ -1,0 +1,173 @@
+// ============================================
+// CSS 变量主题系统 - Linear 规格，支持深色/浅色切换
+// 参考: docs/design/linear-design-system.md（本地参考，不入库；来源: frontend-design-md 技能库 linear.app/DESIGN.md）
+// ============================================
+
+// ==================== 深色主题 (默认) ====================
+:root {
+  // 字体
+  --font-sans: 'Inter Variable', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, Monaco, 'Courier New', monospace;
+
+  // 主色调
+  --color-primary: #f7f8f8;
+  --color-success: #27a644;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #8a8f98;
+
+  // 强调色
+  --accent-primary: #5e6ad2;
+  --accent-blue: #7170ff;
+  --accent-cyan: #06b6d4;
+  --accent-green: #10b981;
+  --accent-yellow: #f59e0b;
+  --accent-red: #ef4444;
+  --accent-purple: #8b5cf6;
+
+  // 背景层级 (Linear 官方表面阶)
+  --bg-base: #08090a;
+  --bg-elevated: #0f1011;
+  --bg-surface: #191a1b;
+  --bg-overlay: #191a1b;
+  --bg-hover: #28282c;
+  --bg-page: #08090a;
+
+  // 文本颜色 (Linear 4 级灰阶)
+  --text-primary: #f7f8f8;
+  --text-regular: #d0d6e0;
+  --text-secondary: #8a8f98;
+  --text-tertiary: #62666d;
+  --text-muted: #52525b;
+  --text-placeholder: #52525b;
+
+  // 边框颜色
+  --border-subtle: rgba(255, 255, 255, 0.05);
+  --border-base: rgba(255, 255, 255, 0.08);
+  --border-light: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.12);
+
+  // 玻璃拟态
+  --glass-bg: rgba(255, 255, 255, 0.03);
+  --glass-bg-hover: rgba(255, 255, 255, 0.06);
+  --glass-border: rgba(255, 255, 255, 0.08);
+
+  // 阴影
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-base: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  // 滚动条
+  --scrollbar-thumb: rgba(255, 255, 255, 0.1);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.15);
+  --scrollbar-track: transparent;
+
+  // 输入框
+  --input-bg: rgba(255, 255, 255, 0.03);
+  --input-border: rgba(255, 255, 255, 0.08);
+  --input-border-focus: var(--accent-blue);
+
+  // 表格
+  --table-header-bg: rgba(255, 255, 255, 0.02);
+  --table-row-hover: rgba(255, 255, 255, 0.04);
+  --table-border: rgba(255, 255, 255, 0.05);
+
+  // 弹窗/对话框
+  --dialog-bg: #191a1b;
+  --dialog-border: rgba(255, 255, 255, 0.08);
+
+  // 下拉菜单
+  --dropdown-bg: #191a1b;
+  --dropdown-hover: rgba(255, 255, 255, 0.06);
+
+  // 标签
+  --tag-bg: rgba(255, 255, 255, 0.1);
+  --tag-text: var(--text-secondary);
+}
+
+// ==================== 浅色主题 (Linear light mode 表面/边框映射) ====================
+:root.light {
+  // 主色调
+  --color-primary: #111111;
+  --color-success: #27a644;
+  --color-warning: #f59e0b;
+  --color-danger: #ef4444;
+  --color-info: #8a8f98;
+
+  // 强调色 (两主题一致)
+  --accent-primary: #5e6ad2;
+  --accent-blue: #7170ff;
+  --accent-cyan: #06b6d4;
+  --accent-green: #10b981;
+  --accent-yellow: #f59e0b;
+  --accent-red: #ef4444;
+  --accent-purple: #8b5cf6;
+
+  // 背景层级 (Linear light mode)
+  --bg-base: #f7f8f8;
+  --bg-elevated: #ffffff;
+  --bg-surface: #ffffff;
+  --bg-overlay: #ffffff;
+  --bg-hover: #f3f4f5;
+  --bg-page: #f7f8f8;
+
+  // 文本颜色 (深灰阶保持)
+  --text-primary: #111111;
+  --text-regular: #333333;
+  --text-secondary: #666666;
+  --text-tertiary: #999999;
+  --text-muted: #bbbbbb;
+  --text-placeholder: #999999;
+
+  // 边框颜色 (Linear light border)
+  --border-subtle: rgba(0, 0, 0, 0.05);
+  --border-base: #e6e6e6;
+  --border-light: #e6e6e6;
+  --border-strong: #d0d6e0;
+
+  // 玻璃拟态 (浅色版本)
+  --glass-bg: rgba(255, 255, 255, 0.8);
+  --glass-bg-hover: rgba(255, 255, 255, 0.9);
+  --glass-border: rgba(0, 0, 0, 0.08);
+
+  // 阴影 (更轻的阴影)
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --shadow-base: 0 2px 8px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 4px 16px rgba(0, 0, 0, 0.12);
+
+  // 滚动条
+  --scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
+  --scrollbar-track: transparent;
+
+  // 输入框
+  --input-bg: #ffffff;
+  --input-border: #d0d6e0;
+  --input-border-focus: var(--accent-blue);
+
+  // 表格
+  --table-header-bg: #f7f8f8;
+  --table-row-hover: #f3f4f5;
+  --table-border: #e6e6e6;
+
+  // 弹窗/对话框
+  --dialog-bg: #ffffff;
+  --dialog-border: #e6e6e6;
+
+  // 下拉菜单
+  --dropdown-bg: #ffffff;
+  --dropdown-hover: #f3f4f5;
+
+  // 标签
+  --tag-bg: rgba(0, 0, 0, 0.06);
+  --tag-text: var(--text-secondary);
+}
+
+// ==================== 主题过渡动画 ====================
+:root {
+  --theme-transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+html, body, #app {
+  transition: var(--theme-transition);
+}
