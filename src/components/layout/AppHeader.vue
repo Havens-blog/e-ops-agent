@@ -4,73 +4,69 @@
 // 左 = 折叠按钮 + 面包屑（首页 / 当前页，当前页取自侧边栏 active 项文案）
 // 右 = 租户选择器占位 + 应用切换器占位 + 主题切换（月/日）+ 用户头像（渐变）+ 用户名
 //
-// 占位说明（Hard Rule）：应用切换器（新标签开 e-cam-web）与租户选择器为 3.1
-// TenantSelector 共享组件，本任务只留挂载点与 header 结构。零租户受限态：
-// 租户选择器禁用占位（显示契约 tenant.none 文案）+ 应用切换器隐藏。
-import { computed } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
-import { Expand, Fold, Moon, Sunny } from '@element-plus/icons-vue'
-import { logout } from '@/api/auth'
-import { useUserStore } from '@/stores/user'
-import { useThemeStore } from '@/stores/theme'
-import { findMenuItemByPath } from './menuConfig'
+// 占位说明（task 3.1）：应用切换器（新标签开 e-cam-web）与租户选择器为 3.1
+// TenantSelector / AppSwitcher 共享组件，**由 MainLayout 经 #header-actions slot 注入**
+// （MainLayout 挂载点）。零租户受限态由各组件自处理：TenantSelector 显示契约
+// tenant.none 禁用占位、AppSwitcher v-if 隐藏（UF-2 受限视图）。
+import { computed } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { Expand, Fold, Moon, Sunny } from "@element-plus/icons-vue";
+import { logout } from "@/api/auth";
+import { useUserStore } from "@/stores/user";
+import { useThemeStore } from "@/stores/theme";
+import { findMenuItemByPath } from "./menuConfig";
 
 const props = defineProps<{
   /** 侧边栏折叠态（折叠按钮图标随态切换） */
-  collapsed: boolean
-}>()
+  collapsed: boolean;
+}>();
 
-const route = useRoute()
-const router = useRouter()
-const userStore = useUserStore()
-const themeStore = useThemeStore()
+const route = useRoute();
+const router = useRouter();
+const userStore = useUserStore();
+const themeStore = useThemeStore();
 
 const emit = defineEmits<{
   /** 点击折叠按钮（父 MainLayout 切 collapsed / drawerOpen） */
-  (e: 'toggle-collapse'): void
-}>()
+  (e: "toggle-collapse"): void;
+}>();
 
 /** 当前页文案（取自侧边栏 active 项文案；非菜单页回退 route.meta title 或路径段） */
 const currentPageLabel = computed(() => {
-  const item = findMenuItemByPath(route.path)
-  if (item) return item.label
-  if (route.path === '/login') return '登录'
-  if (route.name === 'forbidden') return '无权限'
-  return '当前页'
-})
-
-/** 零租户受限态（UF-2 受限视图）：租户选择器禁用占位 + 应用切换器隐藏 */
-const isRestricted = computed(
-  () => !userStore.isAdmin && userStore.tenants.length === 0,
-)
+  const item = findMenuItemByPath(route.path);
+  if (item) return item.label;
+  if (route.path === "/login") return "登录";
+  if (route.name === "forbidden") return "无权限";
+  return "当前页";
+});
 
 /** 显示名（nickname 缺失回退 username，与 user store displayName 同款） */
-const displayName = computed(() => userStore.profile?.displayName ?? '未登录')
+const displayName = computed(() => userStore.profile?.displayName ?? "未登录");
 
 /** 用户名（username，头像旁副文案） */
-const username = computed(() => userStore.profile?.username ?? '')
+const username = computed(() => userStore.profile?.username ?? "");
 
 /** 主题图标随主题互换：dark → 月（点切日），light → 日（点切月） */
-const themeIcon = computed(() => (themeStore.theme === 'dark' ? Moon : Sunny))
+const themeIcon = computed(() => (themeStore.theme === "dark" ? Moon : Sunny));
 const themeLabel = computed(() =>
-  themeStore.theme === 'dark' ? '切换为浅色主题' : '切换为深色主题',
-)
+  themeStore.theme === "dark" ? "切换为浅色主题" : "切换为深色主题",
+);
 
 async function onLogout(): Promise<void> {
   // 登出：销毁共享 Redis session（POST /api/iam/user/logout）。
   // 不论 API 是否成功，复位本地会话态 + SPA 跳 /login（与请求层 401 收敛同向）。
   try {
-    await logout()
+    await logout();
   } catch {
     // 网络失败不阻断登出流程：本地复位 + 跳登录，下次请求自然 401 收敛
   } finally {
-    userStore.resetState()
-    router.push('/login')
+    userStore.resetState();
+    router.push("/login");
   }
 }
 
 function onToggleCollapse(): void {
-  emit('toggle-collapse')
+  emit("toggle-collapse");
 }
 </script>
 
@@ -102,27 +98,10 @@ function onToggleCollapse(): void {
       </nav>
     </div>
 
-    <!-- 右：占位槽 + 主题切换 + 用户头像下拉 -->
+    <!-- 右：租户选择器 + 应用切换器（MainLayout 经 #header-actions slot 注入，task 3.1） + 主题切换 + 用户头像下拉 -->
     <div class="header-right">
-      <!-- 租户选择器占位（3.1 TenantSelector 挂载点） -->
-      <div
-        class="header-slot header-tenant-slot"
-        :class="{ 'is-disabled': isRestricted }"
-        :aria-disabled="isRestricted"
-        :title="isRestricted ? '无所属租户' : undefined"
-      >
-        <span class="header-slot-label">
-          {{ isRestricted ? '无所属租户' : '租户选择器' }}
-        </span>
-      </div>
-
-      <!-- 应用切换器占位（3.1 挂载点；零租户受限态隐藏） -->
-      <div
-        v-if="!isRestricted"
-        class="header-slot header-app-slot"
-        title="应用切换器"
-      >
-        <span class="header-slot-label">应用切换器</span>
+      <div class="header-actions">
+        <slot name="header-actions" />
       </div>
 
       <!-- 主题切换（月/日，html 根节点切 light class） -->
@@ -242,25 +221,11 @@ function onToggleCollapse(): void {
   max-width: 240px;
 }
 
-.header-slot {
+.header-actions {
   display: inline-flex;
   align-items: center;
-  height: 32px;
-  padding: 0 12px;
-  border-radius: 6px;
-  border: 1px dashed var(--border-base);
-  color: var(--text-tertiary);
-  font-size: 12px;
-  white-space: nowrap;
-}
-
-.header-slot-label {
-  pointer-events: none;
-}
-
-.header-tenant-slot.is-disabled {
-  opacity: 0.6;
-  border-style: dotted;
+  gap: 8px;
+  min-width: 0;
 }
 
 .header-user-trigger {

@@ -13,72 +13,75 @@
 //   - 零租户受限态：侧边栏仅工作台（menuConfig inferRole → normal）+ header
 //     租户选择器禁用占位 + 应用切换器隐藏（AppHeader isRestricted）
 //
-// 注：应用切换器 / 租户选择器为 3.1 TenantSelector 共享组件，本任务只留挂载点。
-import { computed, onMounted, onUnmounted, ref } from 'vue'
-import { ElMessage } from 'element-plus'
-import AppHeader from '@/components/layout/AppHeader.vue'
-import SidebarMenu from '@/components/layout/SidebarMenu.vue'
+// 注：应用切换器 / 租户选择器为 3.1 TenantSelector / AppSwitcher 共享组件，
+// **由本布局经 AppHeader 的 #header-actions slot 注入**（task 3.1 挂载点）。
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import { ElMessage } from "element-plus";
+import AppHeader from "@/components/layout/AppHeader.vue";
+import SidebarMenu from "@/components/layout/SidebarMenu.vue";
+import TenantSelector from "@/components/TenantSelector.vue";
+import AppSwitcher from "@/components/AppSwitcher.vue";
 
 /** 折叠态（桌面 64px / 展开 220px） */
-const collapsed = ref(false)
+const collapsed = ref(false);
 /** 抽屉打开（窄屏 < 1024px 时折叠按钮转抽屉开合） */
-const drawerOpen = ref(false)
+const drawerOpen = ref(false);
 /** 是否窄屏（< 1024px 侧边栏转抽屉，UF-2 响应式） */
-const isNarrow = ref(false)
+const isNarrow = ref(false);
 
-const NARROW_BREAKPOINT = 1024
+const NARROW_BREAKPOINT = 1024;
 
 function updateBreakpoint(): void {
-  isNarrow.value = window.innerWidth < NARROW_BREAKPOINT
+  isNarrow.value = window.innerWidth < NARROW_BREAKPOINT;
   // 进入窄屏：收起折叠态（抽屉默认关闭）；离开窄屏：恢复桌面折叠态
   if (isNarrow.value) {
-    collapsed.value = false
-    drawerOpen.value = false
+    collapsed.value = false;
+    drawerOpen.value = false;
   }
 }
 
-let mediaQuery: MediaQueryList | null = null
+let mediaQuery: MediaQueryList | null = null;
 function onMediaChange(e: MediaQueryListEvent): void {
-  isNarrow.value = !e.matches
+  isNarrow.value = !e.matches;
   if (isNarrow.value) {
-    collapsed.value = false
-    drawerOpen.value = false
+    collapsed.value = false;
+    drawerOpen.value = false;
   }
 }
 
 onMounted(() => {
-  updateBreakpoint()
-  mediaQuery = window.matchMedia(`(min-width: ${NARROW_BREAKPOINT}px)`)
-  mediaQuery.addEventListener('change', onMediaChange)
-})
+  updateBreakpoint();
+  mediaQuery = window.matchMedia(`(min-width: ${NARROW_BREAKPOINT}px)`);
+  mediaQuery.addEventListener("change", onMediaChange);
+});
 
 onUnmounted(() => {
-  mediaQuery?.removeEventListener('change', onMediaChange)
-})
+  mediaQuery?.removeEventListener("change", onMediaChange);
+});
 
 /** 折叠按钮：桌面切折叠态，窄屏切抽屉开合 */
 function onToggleCollapse(): void {
   if (isNarrow.value) {
-    drawerOpen.value = !drawerOpen.value
+    drawerOpen.value = !drawerOpen.value;
   } else {
-    collapsed.value = !collapsed.value
+    collapsed.value = !collapsed.value;
   }
 }
 
 /** 抽屉覆盖层点击关闭 */
 function onDrawerOverlayClick(): void {
-  drawerOpen.value = false
+  drawerOpen.value = false;
 }
 
 /** logo 点击：窄屏下顺手关抽屉（桌面态回工作台由 SidebarMenu 自身 router.push 处理） */
 function onLogoClick(): void {
-  if (isNarrow.value) drawerOpen.value = false
+  if (isNarrow.value) drawerOpen.value = false;
 }
 
 /** 传给 AppHeader 的 collapsed：桌面态用 collapsed，窄屏抽屉打开时视作展开 */
 const headerCollapsed = computed(() =>
   isNarrow.value ? !drawerOpen.value : collapsed.value,
-)
+);
 
 // 403 原地 toast：监听 window 自定义事件 'hc:forbidden'（请求层 / store catch 可派发）。
 // 文案出口走契约 forbidden（逐字「无权限执行该操作」，Hard Rule 零二次映射）。
@@ -86,20 +89,20 @@ const headerCollapsed = computed(() =>
 // store catch 路径由 4.x/5.x 落地时派发此事件，布局侧提供 toast 承接。
 function onForbidden(): void {
   ElMessage({
-    message: '无权限执行该操作',
-    type: 'warning',
+    message: "无权限执行该操作",
+    type: "warning",
     duration: 3000,
     grouping: true,
-  })
+  });
 }
 
 onMounted(() => {
-  window.addEventListener('hc:forbidden', onForbidden as EventListener)
-})
+  window.addEventListener("hc:forbidden", onForbidden as EventListener);
+});
 
 onUnmounted(() => {
-  window.removeEventListener('hc:forbidden', onForbidden as EventListener)
-})
+  window.removeEventListener("hc:forbidden", onForbidden as EventListener);
+});
 </script>
 
 <template>
@@ -123,7 +126,12 @@ onUnmounted(() => {
       <AppHeader
         :collapsed="headerCollapsed"
         @toggle-collapse="onToggleCollapse"
-      />
+      >
+        <template #header-actions>
+          <TenantSelector />
+          <AppSwitcher />
+        </template>
+      </AppHeader>
       <main class="layout-content">
         <router-view />
       </main>
