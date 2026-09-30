@@ -44,16 +44,31 @@ export interface User {
 }
 
 /**
- * 租户（UF-6；eiam 实盘形状 = user-mapper EiamTenant：id/name/code/domain）。
+ * 租户（UF-6；eiam 实盘形状 = TenantVO：id/name/code/domain/status/ctime，parity §3.2 line 319 实核）。
+ * tech-design Data Models 基线形为 {id,name,code,domain}；UF-6 Data Binding（ui-design）要求状态列
+ * （status 启用/禁用 badge），故规范形并入 status（与 User.status 同款归一词表，复用 StatusBadge）。
+ *
  * UF-6 禁用前置「未过期会话数 = 0」Phase 0 结论（parity G-4）：eiam 无任何会话计数端点 →
- * tech-design Data Models 预置降级生效：禁用直接提交，被拒时展示 eiam 拒绝消息
- * （是否携带活跃会话数随证据-P 核验）；前端不做自算前置校验。
+ * tech-design Data Models 预置降级生效：禁用直接提交（tenant/update status=disable），
+ * 被拒时展示 eiam 拒绝消息中的活跃会话数（tenant.disable_blocked 契约 {n}=active_session_count）；
+ * 前端不做自算前置校验。活跃会话数列无 list 数据源 → 表格列降级 '—'，
+ * 计数仅在禁用被拒时从 eiam 拒绝消息中提取展示（与列同源 = 同一 active_session_count 字段）。
  */
 export interface Tenant {
   id: number;
   name: string;
   code: string;
   domain: string;
+  /**
+   * 启用/禁用状态（UF-6 状态列 + 禁用 lever）。
+   * eiam 原值为 int（1=活跃 / 2=禁用，parity §3.2 line 321），api 层归一为字符串词表，
+   * 未知值归一 'unknown'（与 User.status 同款 normalizeStatus 口径，复用 StatusBadge）。
+   *
+   * 可选：profile 的 tenants 列表（UF-11 选择器）不携带 status（RetrieveUser.tenants 仅
+   * id/name/code/domain），仅 tenant/list 端点（TenantVO）返回。TenantSelector 不渲染状态列；
+   * UF-6 列表页经 listTenants 归一后必填，视图层用 `?? 'unknown'` 兜底防御。
+   */
+  status?: "active" | "disable" | "unknown";
 }
 
 /**
