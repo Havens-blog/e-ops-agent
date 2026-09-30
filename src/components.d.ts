@@ -8,6 +8,7 @@ export {}
 declare module 'vue' {
   export interface GlobalComponents {
     CopyContractText: typeof import('./components/CopyContractText.vue')['default']
+    ElButton: typeof import('element-plus/es')['ElButton']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
   }

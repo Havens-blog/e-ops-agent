@@ -30,6 +30,16 @@ function getSessionToken(): string | undefined {
   return match?.[1] ? decodeURIComponent(match[1]) : undefined
 }
 
+/**
+ * 会话 cookie 是否存在（router 全局守卫 ① 唯一调用点，tech-design §Architecture 守卫链）。
+ * 同步、不发请求：cookie 缺失即判定未登录 → 守卫 SPA 跳 /console/login（带 redirect 回跳），
+ * 避免明知无凭据仍发 profile 请求触发 401 硬跳转（redirectToLogin 的 window.location.href）。
+ * cookie 值真伪由 eiam 服务端校验，本函数只判存在性（与 getSessionToken 同源常量，不重复硬编码）。
+ */
+export function hasSessionCookie(): boolean {
+  return getSessionToken() !== undefined
+}
+
 export const eiamAxios: AxiosInstance = axios.create({
   timeout: REQUEST_TIMEOUT_MS,
   withCredentials: true,
