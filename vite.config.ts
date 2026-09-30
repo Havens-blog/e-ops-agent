@@ -107,6 +107,15 @@ export default defineConfig(({ mode }) => {
       include: ['src/**/*.test.ts', 'scripts/**/*.test.mjs'],
       // 2.1 空骨架零测试文件，`pnpm test` 空跑需可执行；测试落地后此开关自然失效
       passWithNoTests: true,
+      // element-plus 组件进入测试图（2.8 MainLayout 用 el-tooltip/el-dropdown/el-icon +
+      // ElMessage）后，其 ESM 内的 .css 裸 import 在 node ESM loader 下报「Unknown file
+      // extension ".css"」。inline 强制 vite 转译该包，CSS 经 vitest 默认 stub 成空模块，
+      // 不污染断言。与 e-cam-web 同款处置。
+      server: {
+        deps: {
+          inline: [/element-plus/],
+        },
+      },
     },
 
     // 日志级别
