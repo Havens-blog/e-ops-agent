@@ -17,13 +17,16 @@
       "sourceCommit": "08904e9d0a21f4239f06f6e46e00388835155f2e",
       "sourceCommitDate": "2026-09-21",
       "sha256": "dcac0148759c1b0d4985ac455dc13d1cc3909f92e217e8f68cbb90caf202f762"
-    }
-  ],
-  "pending": [
+    },
     {
       "path": "src/api/request/eiam.ts",
       "sourcePath": "src/api/request/eiam.ts",
-      "reason": "eiamAxios 模式文件尚未落地（任务 2.4）；落地时随本清单一并登记 sha256 × 源 commit"
+      "sourceCommit": "a6ca24e4ebfd4d390685aea69a7b3efadfa930de",
+      "sourceCommitDate": "2026-08-11",
+      "sha256": "6b330281577f530fc26679a3730e2959b19aa4332e1d4cd8550188c354121525",
+      "sourceSha256": "3c08734545a35dd6be9e34243e06d4679486d3faf833a8073baee6ac4b48a267",
+      "note": "模式文件（非逐字节拷贝）：e-cam-web 源文件 import ./index(redirectToLogin) 与 @/utils/cookie(getEcmdbToken)，两模块不在 2.4 改动面内，本仓自包含适配——cookie 读取内联（同名 ecmdb-token-key，读法同 utils/cookie.ts）+ redirectToLogin(isRedirectingToLogin 防抖) 内联（登录目标恒 /console/login），另按任务 2.4 AC 增加 unwrapEnvelope/ApiError 错误分类学。sha256 = 控制台文件本体（LF 工作区形态）；sourceSha256 = e-cam-web 模式源 git blob（LF）——CI 漂移防线：模式源 sha 变化 → 人工评估差异 → 同步适配 + 更新双 hash + 请求层冒烟回归。e-cam-web 工作区（Windows autocrlf CRLF 形态）实测 sha256 = b3ec601e3c1afac79430182aa078146eb9af35565aea755c188d6d16ee9eb342，供本机复算对照。"
     }
-  ]
+  ],
+  "pending": []
 }
