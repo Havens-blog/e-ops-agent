@@ -104,7 +104,7 @@ export default defineConfig(({ mode }) => {
     test: {
       globals: true,
       environment: 'node',
-      include: ['src/**/*.test.ts'],
+      include: ['src/**/*.test.ts', 'scripts/**/*.test.mjs'],
       // 2.1 空骨架零测试文件，`pnpm test` 空跑需可执行；测试落地后此开关自然失效
       passWithNoTests: true,
     },

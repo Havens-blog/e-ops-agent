@@ -1,0 +1,123 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # ── AC1: typecheck（vue-tsc）+ build ──────────────────────────────────
+  typecheck-build:
+    name: Typecheck & Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout haven-console
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.30.3
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck (vue-tsc)
+        run: pnpm typecheck
+
+      - name: Build + 生成 .gz（构建期预生成，供 nginx gzip_static）
+        run: pnpm build:gz
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  # ── AC1: vitest ──────────────────────────────────────────────────────
+  vitest:
+    name: Vitest
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout haven-console
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10.30.3
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install deps
+        run: pnpm install --frozen-lockfile
+
+      - name: Vitest
+        run: pnpm test
+
+  # ── AC2: gzip 预算闸门（≤ 300KB，四桶分解）────────────────────────────
+  # 依赖 typecheck-build 产物（dist/**/*.gz）
+  gzip-budget:
+    name: Gzip Budget (≤300KB)
+    needs: typecheck-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout haven-console
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist
+
+      - name: Gzip 预算检查（Hard Rule：超限必须 fail）
+        run: node scripts/gzip-budget.mjs dist
+
+  # ── AC3/AC4: 拷贝面漂移对比（e-cam-web 源文件 sha256 vs shared-hashes.json）──
+  # Hard Rule：漂移对比只能以 e-cam-web 对应 commit 源文件为准。
+  drift-compare:
+    name: Drift Compare (e-cam-web sha256)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout haven-console
+        uses: actions/checkout@v4
+
+      - name: Checkout e-cam-web（漂移比对源仓）
+        uses: actions/checkout@v4
+        with:
+          repository: Havens-blog/e-cam-web
+          ref: main
+          path: e-cam-web
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: 漂移比对（e-cam-web 源文件重算 sha256 vs shared-hashes.json）
+        env:
+          # drift-check.mjs 默认取 ../e-cam-web；CI 下把源仓 checkout 到 ./e-cam-web
+          E_CAM_WEB_ROOT: ${{ github.workspace }}/e-cam-web
+        run: node scripts/drift-check.mjs shared-hashes.json "$E_CAM_WEB_ROOT"

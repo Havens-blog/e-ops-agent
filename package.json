@@ -8,9 +8,13 @@
     "dev": "vite",
     "build": "vite build",
     "build:check": "vue-tsc -b && vite build",
+    "build:gz": "vite build && node scripts/generate-gz.mjs",
     "typecheck": "vue-tsc -b",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "ci:gzip-budget": "node scripts/gzip-budget.mjs dist",
+    "ci:drift": "node scripts/drift-check.mjs shared-hashes.json",
+    "ci:generate-gz": "node scripts/generate-gz.mjs dist"
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.3.2",
