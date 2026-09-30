@@ -15,3 +15,19 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv;
 }
+
+/**
+ * E2E 调试钩子（localhost 限定，main.ts 挂载；非 localhost 零暴露）。
+ * 任务 3.4 S-M2-06 写前守卫负向场景在真实浏览器中调用 enforceWriteGuard 验证。
+ */
+interface HcDebugHooks {
+  enforceWriteGuard: () => boolean;
+  getPageEnterTenantSnapshot: () => number;
+  __resetPageEnterTenantSnapshot: () => void;
+  fetchProfile: () => Promise<boolean>;
+  currentTenantId: () => number;
+}
+
+interface Window {
+  __hcDebug?: HcDebugHooks;
+}
