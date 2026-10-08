@@ -554,7 +554,7 @@
       "dependencies": [
         "5.summary"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "5.gate.md",
       "record": "records/5.gate.md",
       "breaking": true,
@@ -573,7 +573,7 @@
         "5.5",
         "5.6"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "5.summary.md",
       "record": "records/5.summary.md",
       "type": "doc.summary"
@@ -710,7 +710,7 @@
       "dependencies": [
         "5.6"
       ],
-      "status": "pending",
+      "status": "in_progress",
       "file": "validate-code.md",
       "record": "records/validate-code.md",
       "type": "validation.code"
