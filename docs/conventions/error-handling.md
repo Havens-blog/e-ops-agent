@@ -24,3 +24,16 @@ domains: [error-handling, backend, reliability]
 
 - 使用 `gotomicro/ego` 的 `elog` 结构化日志（`elog.FieldErr(err)` 等）。
 - 降级触发、底座调用失败、落库补偿失败均需埋点/告警；错误信息不向用户透出敏感内部细节。
+
+## 错误码 → HTTP 语义（编排层）
+
+> 事实来源：`docs/features/haven-opsagent/design/api-handbook.md` Error Codes。HTTP 状态与业务错误码语义分离：入参校验用 4xx，其余业务降级/半成功一律 2xx + 信封 code。
+
+| 错误码 | HTTP | 语义 |
+|--------|------|------|
+| ERR_PARAM_INVALID | 400 | 请求体非法；仅入参校验使用，意图不明等业务降级一律 200 |
+| ERR_NOT_FOUND | 404 | 不存在或跨租户（不泄露存在性） |
+| ERR_CONFLICT | 409 | CAS version 不匹配，返回库内最新条目供刷新 |
+| ERR_QUEUE_FULL | 202 | 队列溢出半成功（信封 code=0、data.dropped=true） |
+| ERR_PERSIST_FAILED | 200 | 落库失败（信封 code=ERR_PERSIST_FAILED、data 仍含报告正文，异步进补偿队列） |
+| ERR_LLM_UNAVAILABLE / 底座超时 | 200 | 三级降级响应（degradeLevel 1~3，绝不向用户抛裸 500） |

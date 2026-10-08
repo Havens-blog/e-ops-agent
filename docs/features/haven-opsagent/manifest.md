@@ -21,6 +21,8 @@ status: tasks
 | ER Diagram | design/er-diagram.md | 8 Mongo 集合（sessions/diagnoses/citations/alerts/risk_entries/llm_usage/settings/compensations）关系与索引 |
 | Mongo Schema | design/schema.mongo.js | mongosh 集合 + 索引初始化脚本（Haven 用 MongoDB 而非 SQL） |
 | Page Map | design/page-map.md | /opsagent 6 P1 页面（4 核心 + 2 运维支撑）+ 2 P2 预留 |
+| Biz Specs (Extracted) | specs/biz-specs.md | 跨功能业务规则提取：多租户隔离、CAS 乐观锁、幂等去重（→ docs/business-rules/） |
+| Tech Specs (Extracted) | specs/tech-specs.md | 跨功能技术约定提取：错误码语义、前端 Vue 工程约定（→ docs/conventions/） |
 
 ## Traceability
 
