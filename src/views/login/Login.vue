@@ -434,6 +434,8 @@ const tabLabel: Record<Tab, string> = {
             <input
               v-model="username"
               type="text"
+              name="username"
+              id="username"
               autocomplete="username"
               class="login-input"
               data-testid="username"
@@ -446,6 +448,8 @@ const tabLabel: Record<Tab, string> = {
             <input
               v-model="password"
               type="password"
+              name="password"
+              id="password"
               autocomplete="current-password"
               class="login-input"
               data-testid="password"
@@ -456,6 +460,7 @@ const tabLabel: Record<Tab, string> = {
             <input
               v-model="ldapSourceId"
               type="text"
+              name="identity-source-id"
               inputmode="numeric"
               class="login-input"
               data-testid="ldap-source-id"
