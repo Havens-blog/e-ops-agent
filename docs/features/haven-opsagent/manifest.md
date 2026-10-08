@@ -1,7 +1,7 @@
 ---
 feature: "haven-opsagent"
 created: "2026-09-23"
-status: tasks
+status: completed
 ---
 
 # Feature: haven-opsagent
