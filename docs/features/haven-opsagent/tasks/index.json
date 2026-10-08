@@ -313,7 +313,7 @@
       "dependencies": [
         "3.gate"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "4.1-alert-worker.md",
       "record": "records/4.1-alert-worker.md",
       "type": "coding.feature",
@@ -327,7 +327,7 @@
       "dependencies": [
         "3.gate"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "4.2-compensation-worker.md",
       "record": "records/4.2-compensation-worker.md",
       "type": "coding.feature",
@@ -341,7 +341,7 @@
       "dependencies": [
         "3.gate"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "4.3-middleware.md",
       "record": "records/4.3-middleware.md",
       "type": "coding.feature",
@@ -356,7 +356,7 @@
         "3.gate",
         "4.3"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "4.4-web-chat.md",
       "record": "records/4.4-web-chat.md",
       "type": "coding.feature",
@@ -371,7 +371,7 @@
         "3.gate",
         "4.3"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "4.5-web-risk-center.md",
       "record": "records/4.5-web-risk-center.md",
       "type": "coding.feature",
@@ -386,7 +386,7 @@
         "3.gate",
         "4.3"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "4.6-web-diagnosis-history.md",
       "record": "records/4.6-web-diagnosis-history.md",
       "type": "coding.feature",
@@ -401,7 +401,7 @@
         "3.gate",
         "4.3"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "4.7-web-settings-agents.md",
       "record": "records/4.7-web-settings-agents.md",
       "type": "coding.feature",
@@ -417,7 +417,7 @@
         "4.1",
         "4.3"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "4.8-alert-webhook.md",
       "record": "records/4.8-alert-webhook.md",
       "type": "coding.feature",
@@ -431,7 +431,7 @@
       "dependencies": [
         "4.summary"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "4.gate.md",
       "record": "records/4.gate.md",
       "breaking": true,
@@ -452,7 +452,7 @@
         "4.7",
         "4.8"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "4.summary.md",
       "record": "records/4.summary.md",
       "type": "doc.summary"
