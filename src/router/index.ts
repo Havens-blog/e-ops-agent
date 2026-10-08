@@ -36,6 +36,12 @@ declare module 'vue-router' {
 
 export const routes: RouteRecordRaw[] = [
   {
+    // 默认落地：登录态直接进根路径 `/` 时无页面组件，须重定向到工作台，否则空白页；
+    // 未登录态由守卫 ① 先拦到 /login（redirect 于守卫前解析，落点最终由守卫再判）。
+    path: '/',
+    redirect: '/workbench',
+  },
+  {
     path: '/login',
     component: () => import('@/views/login/Login.vue'),
     meta: { public: true },

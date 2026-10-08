@@ -159,10 +159,11 @@ afterEach(() => {
 })
 
 describe('2.6 路由表注册', () => {
-  it('11 页 + 2 子页 + 403 页全部以 import() 懒加载注册', () => {
+  it('13 页 + 根路径重定向全部注册（懒加载）', () => {
     const paths = router.getRoutes().map((r) => r.path)
     expect(paths).toEqual(
       expect.arrayContaining([
+        '/',
         '/login',
         '/workbench',
         '/users',
@@ -178,12 +179,18 @@ describe('2.6 路由表注册', () => {
         '/forbidden',
       ]),
     )
-    expect(routes).toHaveLength(13)
+    expect(routes).toHaveLength(14)
   })
 
-  it('所有业务路由组件为动态 import()（懒加载，路由级代码分割）', () => {
+  it('根路径 / 重定向到 /workbench（登录态直接落地不空白）', () => {
+    const root = routes.find((r) => r.path === '/')
+    expect(root).toBeDefined()
+    expect(root?.redirect).toBe('/workbench')
+  })
+
+  it('所有业务路由组件为动态 import()（懒加载，路由级代码分割；根重定向无 component）', () => {
     for (const r of routes) {
-      expect(typeof r.component).toBe('function')
+      if (r.component) expect(typeof r.component).toBe('function')
     }
   })
 
@@ -450,6 +457,9 @@ describe('2.6 路由级懒加载 import() 形态', () => {
       expect(record, `route ${path} 应注册`).toBeDefined()
       expect(typeof record?.component).toBe('function')
     }
-    expect(routes.every((r) => typeof r.component === 'function')).toBe(true)
+    // 根路径 / 为 redirect-only（无 component），其余路由均懒加载
+    expect(
+      routes.every((r) => r.redirect !== undefined || typeof r.component === 'function'),
+    ).toBe(true)
   })
 })
