@@ -94,7 +94,7 @@
       "dependencies": [
         "1.gate"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "2.1-repo-diagnosis.md",
       "record": "records/2.1-repo-diagnosis.md",
       "type": "coding.feature",
@@ -108,7 +108,7 @@
       "dependencies": [
         "1.gate"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "2.2-repo-risk-entries.md",
       "record": "records/2.2-repo-risk-entries.md",
       "type": "coding.feature",
@@ -122,7 +122,7 @@
       "dependencies": [
         "1.gate"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "2.3-repo-alerts-config.md",
       "record": "records/2.3-repo-alerts-config.md",
       "type": "coding.feature",
@@ -136,7 +136,7 @@
       "dependencies": [
         "1.gate"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "2.4-llm-provider.md",
       "record": "records/2.4-llm-provider.md",
       "type": "coding.feature",
@@ -150,7 +150,7 @@
       "dependencies": [
         "1.gate"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "2.5-risk-registry.md",
       "record": "records/2.5-risk-registry.md",
       "type": "coding.feature",
@@ -164,7 +164,7 @@
       "dependencies": [
         "1.gate"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "2.6-baseclient.md",
       "record": "records/2.6-baseclient.md",
       "type": "coding.feature",
@@ -178,7 +178,7 @@
       "dependencies": [
         "2.summary"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "2.gate.md",
       "record": "records/2.gate.md",
       "breaking": true,
@@ -197,7 +197,7 @@
         "2.5",
         "2.6"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "2.summary.md",
       "record": "records/2.summary.md",
       "type": "doc.summary"
