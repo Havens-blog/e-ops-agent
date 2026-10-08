@@ -465,7 +465,7 @@
       "dependencies": [
         "4.gate"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "5.1-theme-routes-nav.md",
       "record": "records/5.1-theme-routes-nav.md",
       "type": "coding.feature",
