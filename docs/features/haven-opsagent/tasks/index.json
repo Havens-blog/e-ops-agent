@@ -599,7 +599,7 @@
       "dependencies": [
         "5.6"
       ],
-      "status": "pending",
+      "status": "completed",
       "file": "consolidate-specs.md",
       "record": "records/consolidate-specs.md",
       "type": "doc.consolidate"
@@ -710,7 +710,7 @@
       "dependencies": [
         "5.6"
       ],
-      "status": "in_progress",
+      "status": "completed",
       "file": "validate-code.md",
       "record": "records/validate-code.md",
       "type": "validation.code"
