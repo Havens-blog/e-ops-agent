@@ -273,6 +273,20 @@ describe("AC：表单校验 + 中性文案（E2 不泄账号）", () => {
     await submitForm(wrapper);
     expect(wrapper.find(".login-error").text()).toBe("用户名或密码错误");
   });
+
+  it("服务端 5xx（链路繁忙）→ eiam.unavailable，不误显密码错", async () => {
+    // eiam 对「服务内部链路繁忙」(4010901) 也回 HTTP 500，须与密码错(4010202)区分，
+    // 否则远端 Redis 抖动时登录会误显「用户名或密码错误」诱用户反复重试。
+    adapterRouting(() => ({
+      status: 500,
+      body: { code: 4010901, msg: "服务内部链路繁忙", data: null },
+    }));
+    const wrapper = await mountLogin();
+    setFieldValue(wrapper, "username", "admin");
+    setFieldValue(wrapper, "password", "correct");
+    await submitForm(wrapper);
+    expect(wrapper.find(".login-error").text()).toBe("身份服务暂不可用，请稍后重试");
+  });
 });
 
 describe("AC：MFA challenge（6 位码 + auth.mfa_invalid + 锁定降级）", () => {

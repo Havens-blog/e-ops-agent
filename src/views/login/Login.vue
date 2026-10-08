@@ -117,6 +117,12 @@ function mapErrorToContractKey(error: unknown, mfaPhase: boolean): string {
   if (error instanceof ApiError) {
     const msg = error.message;
     if (/锁定|次数过多/.test(msg)) return "auth.account_locked";
+    // 服务端不可用：5xx 链路繁忙（eiam「服务内部链路繁忙」4010901）或网络超时（无信封 code=null）。
+    // eiam 对「密码错误」(4010202) 与「链路繁忙」(4010901) 都回 HTTP 500，只能按文案/code 区分；
+    // 正向识别不可用，避免远端 Redis 抖动时登录误显「用户名或密码错误」诱用户反复重试。
+    if (error.code === null || /繁忙|链路|暂不可用|不可用|超时/.test(msg)) {
+      return "eiam.unavailable";
+    }
     if (mfaPhase) return "auth.mfa_invalid";
     // 已知业务 code：优先走 contractText（store 2.4/2.7 同款口径）
     if (error.code !== null) {
