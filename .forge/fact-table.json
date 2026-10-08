@@ -1,0 +1,46 @@
+{
+  "feature": "haven-opsagent",
+  "generatedBy": "T-test-gen-contracts",
+  "facts": [
+    {
+      "journey": "alert-to-risk-center",
+      "contract": "risk-center-query",
+      "surface": "api",
+      "source": "D:/Haven/opsagent/internal/web/risk.go",
+      "endpoint": "GET /api/v1/opsagent/risk-center",
+      "notes": "riskListData{items/total/page/limit/stats}；stats 由 dao.RiskStats 聚合（pendingView/todayNew/highRisk=severity P0|P1）"
+    },
+    {
+      "journey": "alert-to-risk-center",
+      "contract": "risk-status-cas",
+      "surface": "api",
+      "source": "D:/Haven/opsagent/internal/web/risk.go",
+      "endpoint": "POST /risk-center/:id/status + /batch-status",
+      "notes": "expectedVersion CAS findAndModify $inc version；批量逐条、冲突 conflict/not_found"
+    },
+    {
+      "journey": "chat-diagnosis",
+      "contract": "chat-submit",
+      "surface": "api",
+      "source": "D:/Haven/opsagent/internal/web/chat.go",
+      "endpoint": "POST /api/v1/opsagent/chat",
+      "notes": "chatData{type: report|preset_entries|guided|clarify|degraded_notice}；202 异步回退；ERR_PERSIST_FAILED 保 report"
+    },
+    {
+      "journey": "chat-diagnosis",
+      "contract": "intent-correct",
+      "surface": "api",
+      "source": "D:/Haven/opsagent/internal/web/chat.go",
+      "endpoint": "POST /chat/:sessionId/correct",
+      "notes": "targetIntent XOR message；IntentClassifier.Correct 追加 correction_log"
+    },
+    {
+      "journey": "diagnosis-history",
+      "contract": "history-retrieval",
+      "surface": "api",
+      "source": "D:/Haven/opsagent/internal/web/diagnosis.go",
+      "endpoint": "GET /history + /diagnosis/:id",
+      "notes": "historyData{items[]SessionSummary}；diagnosis 带 riskEntryId 惰性 MarkViewed CAS"
+    }
+  ]
+}
