@@ -52,6 +52,14 @@ watch([loading, error], () => {
 function dispatch(): void {
   if (dispatched.value) return;
   if (loading.value || error.value) return;
+  // ≥2 且已选定（switch+reload 而来，currentTenantId 已非 0）：直达工作台。
+  // mustSelectTenant（tenants.length>1）选后恒真，须以 currentTenantId 区分，
+  // 否则 switchTenant 整页 reload 回本页后死循环在选租户列表。
+  if (mustSelectTenant.value && userStore.currentTenantId !== 0) {
+    dispatched.value = true;
+    void router.replace("/workbench");
+    return;
+  }
   if (mustSelectTenant.value) return; // ≥2 → 渲染列表，等用户选择
   const list = tenants.value;
   if (list.length === 0) {

@@ -173,6 +173,17 @@ describe("分流 0/1/≥2（AC-1）", () => {
     expect(router.currentRoute.value.path).toBe("/tenant-select");
     expect(switchSpy).not.toHaveBeenCalled();
   });
+
+  it("≥2 租户 + currentTenantId 已定（switch+reload）→ 直达工作台", async () => {
+    // 回归：选完租户后 switchTenant 整页 reload 回本页，currentTenantId 已非 0，
+    // mustSelectTenant（tenants.length>1）仍为真——早前漏判此条件导致死循环在选租户页。
+    const { router, switchSpy } = await mountPage({
+      tenantsCount: 3,
+      currentTenantId: 3,
+    });
+    expect(router.currentRoute.value.path).toBe("/workbench");
+    expect(switchSpy).not.toHaveBeenCalled();
+  });
 });
 
 describe("平台管理员豁免零租户（AC-2）", () => {
