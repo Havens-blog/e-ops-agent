@@ -55,12 +55,6 @@ export default defineConfig(({ mode }) => {
           changeOrigin: true,
           rewrite: (path) => path.replace(/^\/api\/iam/, '/api'),
         },
-        // opsagent 编排层 API：/api/v1/opsagent/* -> :8081（D:/Haven/opsagent；
-        // 与 nginx.dev.conf location ^~ /api/v1/opsagent/ 同构，不重写路径）
-        '/api/v1/opsagent': {
-          target: 'http://localhost:8081',
-          changeOrigin: true,
-        },
       },
       warmup: {
         clientFiles: ['./src/main.ts', './src/App.vue'],
