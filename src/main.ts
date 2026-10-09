@@ -16,6 +16,9 @@ import { enforceWriteGuard } from "./utils/tenantGuard";
 // sha256 × 源 commit 登记于 shared-hashes.json，CI 漂移对比由 2.11 承接）
 import "./assets/styles/theme-variables.scss";
 import "./assets/styles/element-theme.scss";
+// 运维 Agent 子模块 cyan 深色设计系统（作用域 .opsagent-page，不污染控制台布局；
+// opsagent 前端自云管 cam-web 迁入本仓，records/6.1-console-relocation）
+import "./assets/styles/opsagent-theme.css";
 
 // 装配：Vue / Router / Pinia 三件基础设施 + 主题恢复。
 // 数据流单向闭环 view → stores → api/eiamAxios 自 2.4（请求层）/ 2.6（守卫）/
