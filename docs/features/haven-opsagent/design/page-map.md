@@ -7,9 +7,9 @@ related: design/tech-design.md
 
 ## Page Overview
 
-在**运维平台控制台 haven-console**（Vue3 + Vue Router，base `/console/`）内新增 `/opsagent` 路由组（最终 URL `/console/opsagent/*`），采用批准原型的 **cyan 深色设计系统**（`--background: 222 47% 11%`、`--primary: 199 89% 48%` 等 CSS tokens，作用域 `.opsagent-page` 容器，不污染控制台既有令牌）。侧边菜单经 `menuConfig.ts` 挂「运维 Agent」组。
+在**独立前端子项目 opsagent-web**（Vue3 + Vue Router，base `/opsagent/`，nginx 同域静态托管）内新增 `/opsagent` 路由组，采用批准原型的 **cyan 深色设计系统**（`--background: 222 47% 11%`、`--primary: 199 89% 48%` 等 CSS tokens，作用域 `.opsagent-page` 容器）。顶部导航经 `AppShell` 壳按「核心 / 数据视图 / 管理」五项展示。
 
-> 归属变更（2026-10-09）：原宿主为云管 e-cam-web（`/opsagent` 路由组），已按「接入运维平台、不要接入云管」迁入 haven-console，见 records/6.1-console-relocation.md。
+> 归属变更（2026-10-09，两段）：原宿主为云管 e-cam-web（`/opsagent` 路由组）→ 6.1 曾并入平台控制台 haven-console（`/console/opsagent/*`）→ 用户修正「opsagent 需要独立的前端仓库，不要合到平台控制台」→ 6.2 迁出为独立子项目 opsagent-web（控制台仅保留工作台入口卡片纯链接）。见 records/6.1-console-relocation.md、records/6.2-opsagent-standalone.md。
 
 **P1 页面（4 核心 + 2 运维支撑）**：
 
@@ -31,7 +31,7 @@ related: design/tech-design.md
 ### 对话排障（/opsagent/chat）
 
 **Route**: `/opsagent/chat`
-**Layout**: `haven-console/src/layouts/MainLayout.vue`（控制台壳自动承接非公开路由，页面内容区背景改用 cyan 深色 tokens）
+**Layout**: `opsagent-web/src/layouts/AppShell.vue`（独立应用壳：cyan 深色导航头 + 内容 outlet，页面内容区背景改用 cyan 深色 tokens）
 **Auth**: 登录用户
 **Navigation**: 侧边导航「核心 > 对话排障」；「新建诊断」按钮
 

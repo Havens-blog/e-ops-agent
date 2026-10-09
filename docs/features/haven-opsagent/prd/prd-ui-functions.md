@@ -8,7 +8,7 @@ feature: "Haven 运维 Agent（垂直领域 AIOps 编排层）"
 
 ## UI Scope
 
-P1 双界面载体：两个一级页面——**对话窗口**（主入口）+ **风险中心**（结构化待办列表）；另含两个 in-scope 二级页面——**诊断详情**（/opsagent/diagnosis/:id）与**历史诊断回溯**（/opsagent/history）。共 4 个页面，均为新页面（Agent 是运维平台控制台 haven-console 的新建子模块，不复用既有页面路由）。
+P1 双界面载体：两个一级页面——**对话窗口**（主入口）+ **风险中心**（结构化待办列表）；另含两个 in-scope 二级页面——**诊断详情**（/opsagent/diagnosis/:id）与**历史诊断回溯**（/opsagent/history）。共 4 个页面，均为新页面（Agent 是独立前端子项目 opsagent-web 的新建页面，不复用平台既有页面路由）。
 
 ## Navigation Architecture
 
