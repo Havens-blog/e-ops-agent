@@ -16,7 +16,7 @@ status: completed
 | User Stories | prd/prd-user-stories.md | 3 stories 覆盖一线值班（告警跟进、对话定位）与资深运维/SRE（深度排障回溯） |
 | UI Functions | prd/prd-ui-functions.md | 4 个 UI 功能：对话面板、风险中心列表、诊断详情、历史诊断回溯（4 新页面） |
 | UI Design | ui/ui-design.md | cyan 深色设计系统，8 页面原型（对话/风险中心/诊断详情/RCA/拓扑/历史/Agent 管理/系统配置） |
-| Tech Design | design/tech-design.md | 独立 Go 编排层服务（opsagent）+ e-cam-web /opsagent 路由；MongoDB 落库 + Redis 去重 + 4 逻辑 Agent + 契约冻结（904/1000） |
+| Tech Design | design/tech-design.md | 独立 Go 编排层服务（opsagent）+ haven-console 控制台 /opsagent 路由组（2026-10-09 自 e-cam-web 迁入）；MongoDB 落库 + Redis 去重 + 4 逻辑 Agent + 契约冻结（904/1000） |
 | API Handbook | design/api-handbook.md | opsagent 自身 9 端点 + 底座 4 组契约（logquery/资产/eiam/通知） |
 | ER Diagram | design/er-diagram.md | 8 Mongo 集合（sessions/diagnoses/citations/alerts/risk_entries/llm_usage/settings/compensations）关系与索引 |
 | Mongo Schema | design/schema.mongo.js | mongosh 集合 + 索引初始化脚本（Haven 用 MongoDB 而非 SQL） |
@@ -54,3 +54,4 @@ status: completed
 | 4 worker 与 web | 4.gate | 告警 worker + 补偿 + 中间件 + 8 组 handler | 4.1–4.8 |
 | 5 前端 | 5.gate | 主题/路由/导航 + 6 页面 | 5.1–5.6 |
 | 6 集成补全 | — | 组合根装配 + eiam/底座令牌透传 + 平台配置对齐 + e2e 验证 | 6.0 |
+| 6.1 归属迁移 | — | 前端自云管 e-cam-web 迁入运维平台控制台 haven-console（子模块） | 6.1 |

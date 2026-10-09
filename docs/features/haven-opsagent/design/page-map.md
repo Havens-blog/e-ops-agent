@@ -7,7 +7,9 @@ related: design/tech-design.md
 
 ## Page Overview
 
-在 e-cam-web（Vue3 + Vue Router）内新增 `/opsagent` 路由组，采用批准原型的 **cyan 深色设计系统**（`--background: 222 47% 11%`、`--primary: 199 89% 48%` 等 CSS tokens，作用域 `/opsagent` 容器，不污染 Element Plus 默认浅色页）。侧边导航按「核心 / 数据视图 / 管理」分组。
+在**运维平台控制台 haven-console**（Vue3 + Vue Router，base `/console/`）内新增 `/opsagent` 路由组（最终 URL `/console/opsagent/*`），采用批准原型的 **cyan 深色设计系统**（`--background: 222 47% 11%`、`--primary: 199 89% 48%` 等 CSS tokens，作用域 `.opsagent-page` 容器，不污染控制台既有令牌）。侧边菜单经 `menuConfig.ts` 挂「运维 Agent」组。
+
+> 归属变更（2026-10-09）：原宿主为云管 e-cam-web（`/opsagent` 路由组），已按「接入运维平台、不要接入云管」迁入 haven-console，见 records/6.1-console-relocation.md。
 
 **P1 页面（4 核心 + 2 运维支撑）**：
 
@@ -29,7 +31,7 @@ related: design/tech-design.md
 ### 对话排障（/opsagent/chat）
 
 **Route**: `/opsagent/chat`
-**Layout**: `e-cam-web/src/layouts/default`（背景改用 cyan 深色 tokens）
+**Layout**: `haven-console/src/layouts/MainLayout.vue`（控制台壳自动承接非公开路由，页面内容区背景改用 cyan 深色 tokens）
 **Auth**: 登录用户
 **Navigation**: 侧边导航「核心 > 对话排障」；「新建诊断」按钮
 

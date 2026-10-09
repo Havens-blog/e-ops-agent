@@ -8,7 +8,9 @@ status: Draft
 
 ## Overview
 
-在 `D:\Haven` 内新增一个**独立的编排层服务** `opsagent`（复用 Haven 现有栈：Go + gin + gotomicro/ego + MongoDB + Redis），以 HTTP 契约调用 e-cam-service 各底座模块（logquery 日志+诊断、alert 告警、cam/MCP 资产）与 eiam（鉴权 + 租户），前端在 e-cam-web 内新增 `/opsagent` 路由组，采用批准原型的 **cyan 深色设计系统**（自定义 CSS tokens，不依赖 Element Plus 默认浅色）。
+在 `D:\Haven` 内新增一个**独立的编排层服务** `opsagent`（复用 Haven 现有栈：Go + gin + gotomicro/ego + MongoDB + Redis），以 HTTP 契约调用 e-cam-service 各底座模块（logquery 日志+诊断、alert 告警、cam/MCP 资产）与 eiam（鉴权 + 租户），前端以子模块接入**运维平台控制台 haven-console**（`/console/opsagent/*` 路由组 + 「运维 Agent」侧边菜单组），采用批准原型的 **cyan 深色设计系统**（自定义 CSS tokens，不依赖 Element Plus 默认浅色）。
+
+> **归属变更（2026-10-09）**：原设计将前端落在云管控制台 e-cam-web（`/opsagent` 路由组）。按用户修正「opsagent 应该作为子模块接入运维平台，不要接入云管」，前端整体迁入 haven-console，云管侧全部撤除；后端 osagent 服务与数据面契约（e-cam-service logquery/asset）保持不变。见 [records/6.1-console-relocation.md](../tasks/records/6.1-console-relocation.md)。
 
 P1 交付「排障核心闭环」：对话式排障 + 告警主动触发 + 对话/风险中心双界面 + 只读诊断与处置预案 + 会话与诊断落库回溯 + eiam 鉴权与租户隔离，外加**底座接口契约文档 + 契约测试**（显式交付物）。
 
@@ -17,7 +19,7 @@ P1 交付「排障核心闭环」：对话式排障 + 告警主动触发 + 对�
 | 决策 | 结论 | 理由 |
 |------|------|------|
 | 代码落地 | `D:\Haven` 下新建**独立服务** `opsagent`（非 e-cam-service 同进程） | 服务边界清晰、独立部署；编排 API 无状态可扩容，但告警异步链路受单实例约束（见下），P1 **必须单实例部署** |
-| 前端形态 | 复用 e-cam-web + `/opsagent` 路由 + **cyan 深色设计系统** | 共享平台路由/鉴权/构建，同时保留已批准原型的视觉语言 |
+| 前端形态 | 控制台子模块：haven-console（运维平台）`/console/opsagent/*` + **cyan 深色设计系统**（2026-10-09 自 e-cam-web 迁入，见 records/6.1） | 共享平台路由/鉴权/构建，同时保留已批准原型的视觉语言 |
 | 存储 | MongoDB（`opsagent` 独立库）+ Redis | 与 Haven 同栈（`go.mongodb.org/mongo-driver`、`go-redis/v9`） |
 | 多 Agent 运行时 | **单进程编排流水线 + 4 个逻辑 Agent 角色**（Coordinator/LogAnalyst/Monitor/Inspector），非多进程/多框架 | KISS；角色间以 Go interface 协作，各自独立指标/追踪，仍可被 Agent 管理页观测 |
 
@@ -31,7 +33,7 @@ P1 交付「排障核心闭环」：对话式排障 + 告警主动触发 + 对�
 
 ```mermaid
 flowchart TB
-  subgraph Frontend["e-cam-web (Vue3 + Vue Router + cyan 深色设计系统)"]
+  subgraph Frontend["haven-console 运维平台控制台（Vue3 + Vue Router + cyan 深色设计系统，base /console/）"]
     Chat["/opsagent/chat 对话排障"]
     Risk["/opsagent/risk-center 风险中心"]
     Diag["/opsagent/diagnosis/:id 诊断详情"]
@@ -504,25 +506,27 @@ type RiskWhitelistEntry struct {
 
 ## Integration Specs
 
-本功能的 6 个 P1 页面（4 核心 + 2 运维支撑，见 [page-map.md](./page-map.md)）均为**新页面**（`prd-ui-functions.md` 中 placement 均为 `new-page`），不嵌入 e-cam-web 已有页面内部；但它们需注册进 e-cam-web 现有路由表与侧边导航。
+本功能的 6 个 P1 页面（4 核心 + 2 运维支撑，见 [page-map.md](./page-map.md)）均为**新页面**（`prd-ui-functions.md` 中 placement 均为 `new-page`），以子模块方式注册进运维平台控制台 haven-console 的路由表与侧边菜单（2026-10-09 自 e-cam-web 迁入，见 records/6.1-console-relocation.md）。菜单与路由均不声明 eiam 能力码（登录态即可进入），租户边界由后端 EiamAuth（会话校验 + RequireTenant）承接；零租户受限态在菜单层经 `requiresTenant` 隐藏。
 
-### Integration: opsagent 路由组 → e-cam-web 路由表
+### Integration: opsagent 路由组 → haven-console 路由表
 
-- **Target File**: `e-cam-web/src/router/routes.ts`（及 `index.ts` 挂载）
-- **Insertion Point**: 在现有路由数组中新增 `/opsagent/*` 路由组（子路由：chat / risk-center / diagnosis/:id / history / settings / agents）
-- **Data Source**: 无（静态路由声明）；鉴权随平台现有路由守卫
+- **Target File**: `haven-console/src/router/opsagent-routes.ts`（导出 `opsagentRoutes`，经 `router/index.ts` 展开合并）
+- **Insertion Point**: 控制台路由数组新增 `/opsagent/*` 路由组（子路由：chat / risk-center / diagnosis/:id / history / settings / agents）；SPA base 为 `/console/`，最终 URL 形如 `/console/opsagent/chat`
+- **Data Source**: 无（静态路由声明）；鉴权随平台现有路由守卫（无 meta.permissions → 登录态即可）
 
-### Integration: 侧边导航 → e-cam-web 导航/sidebar 组件
+### Integration: 侧边导航 → haven-console 菜单配置
 
-- **Target File**: `e-cam-web/src/layouts/` 下主导航/侧边组件
-- **Insertion Point**: 新增「运维 Agent」分组（含对话排障 / 风险中心 / 诊断详情 / 历史回溯等导航项）
+- **Target File**: `haven-console/src/components/layout/menuConfig.ts`
+- **Insertion Point**: 新增菜单组「运维 Agent」（对话排障 / 风险中心 / 历史回溯 / 系统配置 / Agent 管理；诊断详情为详情子页不进菜单），五项均 `requiresTenant: true`
 - **Data Source**: 静态配置（对应批准原型的分组导航结构）
 
-### Integration: cyan 深色设计系统 tokens → e-cam-web 样式入口
+### Integration: cyan 深色设计系统 tokens → haven-console 样式入口
 
-- **Target File**: `e-cam-web/src/assets/` 下全局样式入口（新增 `opsagent-theme.css` 并引入）
-- **Insertion Point**: 全局样式引入点
-- **Data Source**: 无（纯 CSS 变量，作用域 `/opsagent` 路由容器）
+- **Target File**: `haven-console/src/assets/styles/opsagent-theme.css`（经 `main.ts` 引入）
+- **Insertion Point**: 控制台全局样式引入点（与 theme-variables/element-theme 并列）
+- **Data Source**: 无（纯 CSS 变量，作用域 `.opsagent-page` 路由容器，不污染控制台其余令牌）
+
+> 云管侧（e-cam-web）对应面已于同日全部撤除：`/opsagent/*` 路由、侧边导航「运维 Agent」组、`opsagent-theme.css`、`api/opsagent.ts` 与 vite dev 代理。
 
 ## Testing Strategy
 
@@ -615,11 +619,11 @@ type RiskWhitelistEntry struct {
 | e-cam-service 同进程 internal/opsagent 包 | 直接 import service 接口，无网络开销 | 违背用户「独立服务」决策；耦合 e-cam-service 发布节奏 | 已确认独立服务 |
 | 引入多 Agent 框架（如 multi-agent runtime / 独立进程 agent） | 角色隔离彻底 | 新框架/多进程运维面，违背 KISS 与同栈约束 | 单进程流水线 + 逻辑角色 |
 | SQL 关系库（PostgreSQL） | 强 schema 约束 | 违背 Haven Mongo 同栈 | MongoDB |
-| 独立前端应用 | 完整保留原型风格 | 两套构建/部署，增加维护面 | 复用 e-cam-web + cyan 深色 |
+| 独立前端应用 | 完整保留原型风格 | 两套构建/部署，增加维护面 | haven-console 子模块 + cyan 深色（迁入后） |
 
 ### References
 
 - PRD: [prd/prd-spec.md](../prd/prd-spec.md)、[prd/prd-user-stories.md](../prd/prd-user-stories.md)、[prd/prd-ui-functions.md](../prd/prd-ui-functions.md)
 - UI Design: [ui/ui-design.md](../ui/ui-design.md)、原型 [ui/prototype/index.html](../ui/prototype/index.html)
 - Proposal: [docs/proposals/haven-opsagent/proposal.md](../../../proposals/haven-opsagent/proposal.md)
-- Haven 底座：`D:\Haven\e-cam-service`（logquery/alert/cam/mcp）、`D:\Haven\e-cam-web`、`D:\Haven\eiam`
+- Haven 底座：`D:\Haven\e-cam-service`（logquery/alert/cam/mcp）、`D:\Haven\eiam`；前端宿主：`D:\Haven\haven-console`（运维平台控制台）
